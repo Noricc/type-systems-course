@@ -36,7 +36,7 @@ reduce(ifthenelse(false, _, T2), T2).
 reduce(iszero(0), true).
 reduce(iszero(succ(_)), false).
 
-reduce(pred(0), true).
+reduce(pred(0), 0).
 % Interestingly, this rule allows for pred(succ(false)) to be evaluated to false.
 % You can find this bug by querying reduce(X, false).
 % (Try to do that in Scala!)
