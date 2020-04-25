@@ -59,7 +59,7 @@ reduce(succ(T), succ(T1)) :- reduce(T, T1).
 
 % B-VALUE
 % eval(X, X) = value(X) -- DOES NOT WORK
-eval(X, Y) :- X = Y, value(X).
+eval(X, Y) :- X = Y, value(X). % There is an implicit rule here, that we talk about values
 
 % B-IFTRUE
 eval(ifthenelse(T1, T2, T3), V2) :- eval(T1, true), eval(T2, V2).
@@ -68,16 +68,17 @@ eval(ifthenelse(T1, T2, T3), V2) :- eval(T1, true), eval(T2, V2).
 eval(ifthenelse(T1, T2, T3), V3) :- eval(T1, false), eval(T3, V3).
 
 % B-SUCC
-eval(succ(T1), succ(NV1)) :- eval(T1, NV1).
+% There is an implicit rule in the spec, that NV1 is a numeric value
+eval(succ(T1), succ(NV1)) :- eval(T1, NV1), num_value(NV1).
 
 % B-PREDZERO
 eval(pred(T1), 0) :- eval(T1, 0).
 
 % B-PREDSUCC
-eval(pred(T1), NV1) :- eval(T1, succ(NV1)).
+eval(pred(T1), NV1) :- eval(T1, succ(NV1)), num_value(NV1).
 
 % B-ISZEROZERO
 eval(iszero(T1), true) :- eval(T1, 0).
 
 % B-ISZEROSUCC
-eval(iszero(T1), false) :- eval(T1, succ(NV1)).
+eval(iszero(T1), false) :- eval(T1, succ(NV1)), num_value(NV1).
