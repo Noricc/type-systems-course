@@ -57,6 +57,10 @@ reduce(succ(T), succ(T1)) :- reduce(T, T1).
 % and pass the syntactic forms as arguments.
 % The premises are on the right side, the consequent on the left side of the :-
 
+% B-VALUE
+eval(X, X) :- value(X).
+% eval(X, Y) :- X = Y, value(X). % There is an implicit rule here, that we talk about values
+
 % B-IFTRUE
 eval(ifthenelse(T1, T2, _), V2) :- eval(T1, true), eval(T2, V2).
 
@@ -78,7 +82,3 @@ eval(iszero(T1), true) :- eval(T1, 0).
 
 % B-ISZEROSUCC
 eval(iszero(T1), false) :- eval(T1, succ(NV1)), num_value(NV1).
-
-% B-VALUE
-% eval(X, X) = value(X) -- DOES NOT WORK
-eval(X, Y) :- X = Y, value(X). % There is an implicit rule here, that we talk about values
