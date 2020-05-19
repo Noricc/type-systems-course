@@ -1,16 +1,25 @@
 % Implementation of the untyped lambda calculus.
 
 % SYNTAX
-term(X) :- atom(X).
-term(lambda(X, T)) :- atom(X), term(T).
+ident(X) :- atom(X).
+
+term(lambda(X, T)) :- ident(X), term(T).
 term(app(T1, T2)) :- term(T1), term(T2).
+term(X) :- ident(X).
+
 % Parenthesis not needed here
 
+% VALUES
+value(lambda(X, T)) :- ident(X), term(T).
+
 % EVALUATION
-eval(app(T1, T2), app(T11, T2)) :- term(T1), term(T2), term(T11), eval(T1, T11).
-eval(app(T1, T2), app(T1, T21)) :- term(T1), term(T2), term(T21), eval(T2, T21).
-eval(lambda(X, T1), lambda(X, T11)) :- term(T1), eval(T1, T11).
-% eval(app(lambda(X, T1), T2), ) :-
+eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
+eval(app(T1, T2), app(T1, T21)) :- eval(T2, T21).
+eval(lambda(X, T1), lambda(X, T11)) :- eval(T1, T11).
+eval(app(lambda(X, T1), T2), Result) :- substitute(X, T2, T1, Result).
+
+% Implicit rule?
+eval(X, X) :- value(X).
 
 % SUBSTITUTION
 substitute(X, S, X, S) :- atom(X).
