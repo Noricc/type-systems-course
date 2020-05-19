@@ -1,0 +1,22 @@
+#+TITLE: Type Systems Course: Simply typed lambda calculus
+#+AUTHOR: Noric Couderc
+#+LATEX_CLASS: beamer
+#+OPTIONS: toc:nil
+#+BEAMER_THEME: Madrid
+#+LATEX_HEADER: \usepackage{libertine}
+
+* Slogan
+
+  If you read this:
+  - you probably already know intuitively how type systems work.
+  - Most of the work is about parsing the math.
+
+* Lambda calculus
+
+  - $x$: Variables
+  - $\lambda x . t$: Functions
+  - $t~x$: Function application
+
+* Typing relation
+
+  $\Gamma \vdash t : T$ means the term $t$ is of type $T$ in the context $\Gamma$
