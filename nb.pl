@@ -3,6 +3,7 @@
 % See https://git.cs.lth.se/sde/type-systems-course/-/blob/master/fos2019.github.io/project1.md
 
 % TERMS
+const(term).
 term(true).
 term(false).
 % Numeric literals are terms
@@ -34,7 +35,7 @@ reduce(ifthenelse(false, _, T2), T2).
 
 % Reduction based on values.
 reduce(iszero(0), true).
-reduce(iszero(succ(_)), false).
+reduce(iszero(succ(NV)), false) :- num_value(NV).
 
 reduce(pred(0), 0).
 % Interestingly, this rule allows for pred(succ(false)) to be evaluated to false.
@@ -50,7 +51,6 @@ reduce(iszero(T), iszero(T1)) :- reduce(T, T1).
 reduce(pred(T), pred(T1)) :- reduce(T, T1).
 
 reduce(succ(T), succ(T1)) :- reduce(T, T1).
-
 
 % BIG STEP SEMANTICS
 % Same as previously, we convert the arrow to "eval"
@@ -82,3 +82,9 @@ eval(iszero(T1), true) :- eval(T1, 0).
 
 % B-ISZEROSUCC
 eval(iszero(T1), false) :- eval(T1, succ(NV1)), num_value(NV1).
+
+
+% TESTS
+test1 :- eval(pred(succ(succ(succ(false)))), _). % FALSE
+
+test2(X) :- eval(ifthenelse(iszero(pred(pred(succ(succ(0))))),ifthenelse(iszero(0),true, false), false), X).
