@@ -11,53 +11,51 @@
 
 
 * Untyped Lambda calculus
-
 ** Syntax
-  - $x$: Variables
-  - $\lambda x . t$: Functions
-  - $t~x$: Function application
+  - $\term{x}$: Variables
+  - $\term{\lambda x . t}$: Functions
+  - $\term{t~x}$: Function application
 
 ** Evaluation
 
   \begin{prooftree}
-  \AxiomC{$t_1 \rightarrow t_1'$}
+  \AxiomC{$\term{t_1} \rightarrow \term{t_1'}$}
   \RightLabel{E-APP1}
-  \UnaryInfC{$t_1 t_2 \rightarrow t_1' t_2$}
+  \UnaryInfC{$\term{t_1~t_2} \rightarrow \term{t_1'~t_2}$}
   \end{prooftree}
 
   \begin{prooftree}
-  \AxiomC{$t_2 \rightarrow t_2'$}
+  \AxiomC{$\term{t_2} \rightarrow \term{t_2'}$}
   \RightLabel{E-APP2}
-  \UnaryInfC{$t_1 t_2 \rightarrow t_1 t_2'$}
+  \UnaryInfC{$\term{t_1~t_2} \rightarrow \term{t_1~t_2'}$}
   \end{prooftree}
 
   \begin{prooftree}
   \RightLabel{E-AppAbs}
-  \AxiomC{$(\lambda x . t_{12}) v_2 \rightarrow [x \mapsto v_2]t_{12}$}
+  \AxiomC{$\term{(\lambda x . t_{12})} \term{v_2} \rightarrow [\term{x} \mapsto \term{v_2}] \term{t_{12}}$}
   \end{prooftree}
 
 
 * Typing relation
 
 ** Problem
-   The untyped lambda calculus can get stuck: $x$ is a term.
+   The untyped lambda calculus can get stuck: $term{x}$ is a term.
 
 ** Solution
   - We want to type our terms. We create a typing relation, notated with a ternary operator: $\_ \vdash \_ : \_$
-  - $\Gamma \vdash t : \type{T}$ means the term $t$ is of type $\type{T}$ in the context $\Gamma$
+  - $\Gamma \vdash \term{t} : \type{T}$ means the term $\term{t}$ is of type $\type{T}$ in the context $\Gamma$
 
 * Typed Lambda Calculus
 ** Syntax
-   - $x$ : variables
-   - $\lambda x : \type{T} . t$ : functions (with input type!)
-   - $t~t$ : function application
-
+  - $\term{x}$: Variables
+  - $\term{\lambda x : \type{T} . t}$ : Functions
+  - $\term{t~x}$: Function application
 ** Types
    - $\type{T \rightarrow T}$ : Functions
 
 ** Contexts
    - $\varnothing$: The empty context
-   - $\Gamma, x : \type{T}$: adding $(x, \type{T})$ to the context $\Gamma$.
+   - $\Gamma, \term{x} : \type{T}$: adding $(\term{x}, \type{T})$ to the context $\Gamma$.
 
 * Typing rules (T-VAR)
 
@@ -65,9 +63,9 @@
 
   \huge
   \begin{prooftree}
-  \AxiomC{$x : \type{T} \in \Gamma$}
+  \AxiomC{$\term{x} : \type{T} \in \Gamma$}
   \RightLabel{T-VAR}
-  \UnaryInfC{$\Gamma \vdash x : \type{T}$}
+  \UnaryInfC{$\Gamma \vdash \term{x} : \type{T}$}
   \end{prooftree}
 
 * Typing rules (T-ABS)
@@ -76,9 +74,9 @@
 
   \huge
   \begin{prooftree}
-  \AxiomC{$\Gamma, x : \type{T_1} \vdash t_2 : \type{T_2}$}
+  \AxiomC{$\Gamma, \term{x} : \type{T_1} \vdash \term{t_2} : \type{T_2}$}
   \RightLabel{T-ABS}
-  \UnaryInfC{$\Gamma \vdash \lambda x : \type{T_1} . t_2 : \type{T_1 \rightarrow T_2}$}
+  \UnaryInfC{$\Gamma \vdash \term{\lambda x : \type{T_1} . t_2} : \type{T_1 \rightarrow T_2}$}
   \end{prooftree}
 
 * Typing rules (T-APP)
@@ -87,10 +85,10 @@
 
   \huge
   \begin{prooftree}
-  \AxiomC{$\Gamma \vdash t1 : \type{T_{11} \rightarrow T_{12}}$}
-  \AxiomC{$\Gamma \vdash t_2 : \type{T_{11}}$}
+  \AxiomC{$\Gamma \vdash \term{t1} : \type{T_{11} \rightarrow T_{12}}$}
+  \AxiomC{$\Gamma \vdash \term{t_2} : \type{T_{11}}$}
   \RightLabel{T-APP}
-  \BinaryInfC{$\Gamma \vdash t_1~t_2 : \type{T_{12}}$}
+  \BinaryInfC{$\Gamma \vdash \term{t_1~t_2} : \type{T_{12}}$}
   \end{prooftree}
 
 * Pure Lambda Calculus: Typing Rules
@@ -98,26 +96,26 @@
 ** Typing rule for variables
 
   \begin{prooftree}
-  \AxiomC{$x : \type{T} \in \Gamma$}
+  \AxiomC{$\term{x} : \type{T} \in \Gamma$}
   \RightLabel{T-VAR}
-  \UnaryInfC{$\Gamma \vdash x : \type{T}$}
+  \UnaryInfC{$\Gamma \vdash \term{x} : \type{T}$}
   \end{prooftree}
 
 ** Typing rule for creating functions
 
   \begin{prooftree}
-  \AxiomC{$\Gamma, x : \type{T_1} \vdash t_2 : \type{T_2}$}
+  \AxiomC{$\Gamma, \term{x} : \type{T_1} \vdash \term{t_2} : \type{T_2}$}
   \RightLabel{T-ABS}
-  \UnaryInfC{$\Gamma \vdash \lambda x : \type{T_1} . t_2 : \type{T_1 \rightarrow T_2}$}
+  \UnaryInfC{$\Gamma \vdash \term{\lambda x : \type{T_1} . t_2} : \type{T_1 \rightarrow T_2}$}
   \end{prooftree}
 
 ** Typing rule for applying functions
 
   \begin{prooftree}
-  \AxiomC{$\Gamma \vdash t1 : \type{T_{11} \rightarrow T_{12}}$}
-  \AxiomC{$\Gamma \vdash t_2 : \type{T_{11}}$}
+  \AxiomC{$\Gamma \vdash \term{t1} : \type{T_{11} \rightarrow T_{12}}$}
+  \AxiomC{$\Gamma \vdash \term{t_2} : \type{T_{11}}$}
   \RightLabel{T-APP}
-  \BinaryInfC{$\Gamma \vdash t_1~t_2 : \type{T_{12}}$}
+  \BinaryInfC{$\Gamma \vdash \term{t_1~t_2} : \type{T_{12}}$}
   \end{prooftree}
 
 * Making it more interesting
@@ -128,18 +126,18 @@
 ** Typing rules for Booleans
 
   \begin{equation*}
-        \text{true}: \type{\text{Bool}}
+        \term{\text{true}}: \type{\text{Bool}}
   \end{equation*}
 
   \begin{equation*}
-        \text{false}: \type{\text{Bool}}
+        \term{\text{false}}: \type{\text{Bool}}
   \end{equation*}
 
   \begin{prooftree}
-  \AxiomC{$t_1 : \type{\text{Bool}}$}
-  \AxiomC{$t_2 : \type{T}$}
-  \AxiomC{$t_3 : \type{T}$}
-  \TrinaryInfC{$\text{if}~t_1~\text{then}~t_2~\text{else}~t_3~:~\type{T}$}
+  \AxiomC{$\term{t_1} : \type{\text{Bool}}$}
+  \AxiomC{$\term{t_2} : \type{T}$}
+  \AxiomC{$\term{t_3} : \type{T}$}
+  \TrinaryInfC{$\term{\text{if}~t_1~\text{then}~t_2~\text{else}~t_3}~:~\type{T}$}
   \end{prooftree}
 
 * Properties of typing
@@ -150,8 +148,8 @@
    Each term has only one type
 
 ** Canonical forms
-   1. If $v : \type{\text{Bool}}$, then $v$ is either $true$ or $false$
-   2. If $v : \type{T_1 \rightarrow T_2}$, then $v = \lambda x : \type{T_1} . t_2$
+   1. If $\term{v} : \type{\text{Bool}}$, then $\term{v}$ is either $\term{\text{true}}$ or $\term{\text{false}}$
+   2. If $\term{v} : \type{T_1 \rightarrow T_2}$, then $\term{v} = \term{\lambda x : \type{T_1} . t_2}$
 ** Permutation
    Taking a permutation of the type context doesn't change the typing of the program (order doesn't matter?)
 
@@ -159,37 +157,36 @@
   \centering
   \huge{Safety = Progress + Preservation}
 * Preservation
-  Evaluation doesn't change types
+  \textbf{Evaluation doesn't change types}
 
   More formally:
 
   If:
-  - $\Gamma, x:\type{S} \vdash t:\type{T}$
-  - $\Gamma \vdash s : \type{S}$
+  - $\Gamma, \term{x}:\type{S} \vdash \term{t}:\type{T}$
+  - $\Gamma \vdash \term{s} : \type{S}$
 
 
   Then:
-  - $\Gamma \vdash [x \rightarrow s] t$
+  - $\Gamma \vdash [\term{x} \rightarrow \term{s}] \term{t}$
 
 * Progress
-  If a term is well typed, it's either a value or we can evaluate it
-  (Well-typed programs don't get stuck)
+  \textbf{If a term is well typed, it's either a value or we can evaluate it (Well-typed programs don't get stuck)}
 
   More formally:
-  If $t$ is a closed, well-typed term of type $\type{T}$,
-  then either $t$ is a value, or there is some
-  $t'$ with $t \rightarrow t'$.
+  If $\term{t}$ is a closed, well-typed term of type $\type{T}$,
+  then either $\term{t}$ is a value, or there is some
+  $\term{t'}$ with $\term{t} \rightarrow \term{t'}$.
 
 ** Proof intuition
-   - Suppose $t$ is of type $T$
-   - $t : \type{\type{\text{Bool}}}$
-     - $t = \text{true}$ , done
-     - $t = \text{false}$ , done
-     - $t = \text{if}~t_1~\text{then \dots else \dots}$ : use induction hypothesis to evaluate $t_1$
-   - $t : \type{T_1 \rightarrow T_2}$ , done (functions are values)
-   - $t = t_1~t_2$, either:
-     - We can evaluate $t_1$
-     - We can evaluate $t_2$
+   - Suppose $\term{t}$ is of type $\type{T}$
+   - $\term{t} : \type{\text{Bool}}$
+     - $\term{t} = \term{\text{true}}$ , done
+     - $\term{t} = \term{\text{false}}$ , done
+     - $\term{t} = \term{\text{if}~t_1~\text{then \dots else \dots}}$ : use induction hypothesis to evaluate $\term{t_1}$
+   - $\term{t} : \type{T_1 \rightarrow T_2}$ , done (functions are values)
+   - $\term{t} = \term{t_1~t_2}$, either:
+     - We can evaluate $\term{t_1}$
+     - We can evaluate $\term{t_2}$
 
 * Curry-Howard Correspondence
 
@@ -198,7 +195,7 @@
   | propositions                | types                                |
   | proposition $P \supset Q$   | type $P \rightarrow Q$               |
   | proposition $P \land Q$     | type $P \times Q$ (tuples)           |
-  | proof of proposition $P$    | term $t$ of type $P$                 |
+  | proof of proposition $P$    | term $t$ of type $P$                |
   | proposition $P$ is provable | type $P$ is inhabited (by some term) |
 
   Why do we care?
