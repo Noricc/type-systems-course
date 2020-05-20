@@ -9,12 +9,11 @@
 #+LATEX_HEADER: \newcommand{\type}[1]{\textcolor{purple}{#1}}
 #+LATEX_HEADER: \newcommand{\term}[1]{\textcolor{blue}{#1}}
 
-
 * Untyped Lambda calculus
 ** Syntax
   - $\term{x}$: Variables
   - $\term{\lambda x . t}$: Functions
-  - $\term{t~x}$: Function application
+  - $\term{t~t}$: Function application
 
 ** Evaluation
 
@@ -27,7 +26,7 @@
   \begin{prooftree}
   \AxiomC{$\term{t_2} \rightarrow \term{t_2'}$}
   \RightLabel{E-APP2}
-  \UnaryInfC{$\term{t_1~t_2} \rightarrow \term{t_1~t_2'}$}
+  \UnaryInfC{$\term{v_1~t_2} \rightarrow \term{v_1~t_2'}$}
   \end{prooftree}
 
   \begin{prooftree}
@@ -39,7 +38,8 @@
 * Typing relation
 
 ** Problem
-   The untyped lambda calculus can get stuck: $term{x}$ is a term.
+   The untyped lambda calculus can get stuck: $\term{x}$ is a term.
+
 
 ** Solution
   - We want to type our terms. We create a typing relation, notated with a ternary operator: $\_ \vdash \_ : \_$
@@ -49,7 +49,7 @@
 ** Syntax
   - $\term{x}$: Variables
   - $\term{\lambda x : \type{T} . t}$ : Functions
-  - $\term{t~x}$: Function application
+  - $\term{t~t}$: Function application
 ** Types
    - $\type{T \rightarrow T}$ : Functions
 
@@ -161,13 +161,9 @@
 
   More formally:
 
-  If:
-  - $\Gamma, \term{x}:\type{S} \vdash \term{t}:\type{T}$
-  - $\Gamma \vdash \term{s} : \type{S}$
+  If $\Gamma \vdash \term{t}:\type{T}$ and $\term{t} \rightarrow \term{t'}$
 
-
-  Then:
-  - $\Gamma \vdash [\term{x} \rightarrow \term{s}] \term{t}$
+  Then: $\Gamma \vdash \term{t'} : \type{T}$
 
 * Progress
   \textbf{If a term is well typed, it's either a value or we can evaluate it (Well-typed programs don't get stuck)}
