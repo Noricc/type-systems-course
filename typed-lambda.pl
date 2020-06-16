@@ -11,6 +11,9 @@ term(succ(T)) :- term(T).
 term(iszero(T)) :- term(T).
 term(lambda(X, Type, Term)) :- term(Term).
 term(app(T1, T2)) :- term(T1), term(T2).
+term(pair(T1, T2)) :- term(T1), term(T2).
+term(fst(T)).
+term(snd(T)).
 term(X) :- integer(X).
 term(X) :- atom(X).
 
