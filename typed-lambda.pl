@@ -32,6 +32,7 @@ numeric_value(succ(X)) :- numeric_value(X).
 type(boolT).
 type(natT).
 type(fun(T1, T2)) :- type(T1), type(T2).
+type(pairT(T1, T2)) :-  type(T1), type(T2).
 
 % Evaluation rules
 
