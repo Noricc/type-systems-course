@@ -130,9 +130,21 @@ typing(Ctxt, lambda(X, Type, Term),
 typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, fun(T11, T12)),
                                   typing(Ctxt, T2, T11). % type of argument match
 
+
+% Pairs
+typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
+                                               typing(Ctxt, T2, TT2).
+
+typing(Ctxt, fst(T), T1) :- typing(Ctxt, T, pairT(T1, _)).
+
+typing(Ctxt, snd(T), T1) :- typing(Ctxt, T, pairT(_, T1)).
+
 % Variables
 typing(Ctxt, X, T) :- atom(X), member([X, T], Ctxt).
 
 % TESTS
 % eval(app(lambda(x, _, 0), succ(0)), R). R = 0;
 % typing([], app(lambda(x, natT, x), true), T).
+% eval(pair(true, iszero(0)), T).
+% eval(pair(iszero(0), iszero(succ(0))), T).
+% typing(L, snd(pair(false, x)), natT).
