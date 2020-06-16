@@ -92,5 +92,29 @@ bigstep(T, V) :- eval(T, V).
 bigstep(T, V) :- eval(T, T1), bigstep(T1, V).
 
 
+% TYPES
+typing(_, true, boolT).
+typing(_, false, boolT).
+typing(_, 0, natT).
+typing(Ctxt, pred(T), natT) :- typing(Ctxt, T, natT).
+typing(Ctxt, succ(T), natT) :- typing(Ctxt, T, natT).
+typing(Ctxt, iszero(T), boolT) :- typing(Ctxt, T, natT).
+typing(Ctxt, if(T1, T2, T3), T) :- typing(Ctxt, T1, boolT),
+                                   typing(Ctxt, T2, T),
+                                   typing(Ctxt, T3, T).
+
+
+% Functions
+typing(Ctxt, lambda(X, Type, Term),
+       fun(Type, Type2)) :- append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
+                            typing(Ctxt1, Term, Type2). % and I can type the body with this new context
+% Function application
+typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, fun(T11, T12)),
+                                  typing(Ctxt, T2, T11). % type of argument match
+
+% Variables
+typing(Ctxt, X, T) :- atom(X), member([X, T], Ctxt).
+
 % TESTS
 % eval(app(lambda(x, _, 0), succ(0)), R). R = 0;
+% typing([], app(lambda(x, natT, x), true), T).
