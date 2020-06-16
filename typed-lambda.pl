@@ -14,6 +14,9 @@ term(app(T1, T2)) :- term(T1), term(T2).
 term(X) :- integer(X).
 term(X) :- atom(X).
 
+desugar(let(X, Type, Term1, Term2),
+        app(lambda(X, Type, Term2), Term1).
+
 value(true).
 value(false).
 value(lambda(_, _, _)).
