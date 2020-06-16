@@ -9,16 +9,16 @@ term(if(T1, T2, T3)) :- term(T1), term(T2), term(T3).
 term(pred(T)) :- term(T).
 term(succ(T)) :- term(T).
 term(iszero(T)) :- term(T).
-term(lambda(X, Type, Term)) :- term(Term).
+term(lambda(_, _, Term)) :- term(Term).
 term(app(T1, T2)) :- term(T1), term(T2).
 term(pair(T1, T2)) :- term(T1), term(T2).
-term(fst(T)).
-term(snd(T)).
+term(fst(T)) :- term(T).
+term(snd(T)) :- term(T).
 term(X) :- integer(X).
 term(X) :- atom(X).
 
 desugar(let(X, Type, Term1, Term2),
-        app(lambda(X, Type, Term2), Term1).
+        app(lambda(X, Type, Term2), Term1)).
 
 value(true).
 value(false).
@@ -74,7 +74,7 @@ substitute(X, V, if(T1, T2, T3), if(T11, T21, T31)) :- substitute(X, V, T1, T11)
 substitute(X, V, pred(T), pred(T1)) :- substitute(X, V, T, T1).
 substitute(X, V, succ(T), succ(T1)) :- substitute(X, V, T, T1).
 substitute(X, V, iszero(T), iszero(T1)) :- substitute(X, V, T, T1).
-substitute(X, V, lambda(Y, Type, T), lambda(Y, Type, T)) :- X = Y.
+substitute(X, _, lambda(Y, Type, T), lambda(Y, Type, T)) :- X = Y.
 substitute(X, V, lambda(Y, Type, T), lambda(Y, Type, T1)) :- free_vars(lambda(Y, Type, T), FreeVars),
                                                              member(X, FreeVars),
                                                              substitute(X, V, T, T1).
@@ -82,9 +82,9 @@ substitute(X, V, lambda(Y, Type, T), lambda(Y, Type, T1)) :- free_vars(lambda(Y,
 substitute(X, V, app(T, T1), app(T21, T22)) :- substitute(X, V, T, T21),
                                                substitute(X, V, T1, T22).
 
-substitute(X, V, T, T) :- integer(T).
+substitute(_, _, T, T) :- integer(T).
 substitute(X, V, Var, V) :- atom(Var), X = Var.
-substitute(X, V, Var, Var) :- atom(Var).
+substitute(_, _, Var, Var) :- atom(Var).
 
 free_vars(true, []).
 free_vars(false, []).
@@ -97,7 +97,7 @@ free_vars(if(T1, T2, T3), FreeVars) :- free_vars(T3, FV3),
 free_vars(iszero(T), FreeVars) :- free_vars(T, FreeVars).
 free_vars(pred(T), FreeVars) :- free_vars(T, FreeVars).
 free_vars(succ(T), FreeVars) :- free_vars(T, FreeVars).
-free_vars(lambda(Y, T, T1), FreeVars) :- free_vars(T1, FVs),
+free_vars(lambda(Y, _, T1), FreeVars) :- free_vars(T1, FVs),
                                          subtract(FVs, [Y], FreeVars).
 free_vars(app(T1, T2), FreeVars) :- free_vars(T1, FV1),
                                     free_vars(T2, FV2),
