@@ -23,6 +23,7 @@ desugar(let(X, Type, Term1, Term2),
 value(true).
 value(false).
 value(lambda(_, _, _)).
+value(pair(V1, V2)) :- value(V1), value(V2).
 value(X) :- numeric_value(X).
 
 numeric_value(0).
