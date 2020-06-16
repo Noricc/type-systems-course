@@ -87,4 +87,10 @@ free_vars(app(T1, T2), FreeVars) :- free_vars(T1, FV1),
 
 
 
+
+bigstep(T, V) :- eval(T, V).
 bigstep(T, V) :- eval(T, T1), bigstep(T1, V).
+
+
+% TESTS
+% eval(app(lambda(x, _, 0), succ(0)), R). R = 0;
