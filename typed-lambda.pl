@@ -52,6 +52,16 @@ eval(pred(T), pred(T1)) :- eval(T, T1).
 eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R).
 eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
 eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
+
+eval(fst(pair(V1, _)), V1) :- value(V1).
+eval(snd(pair(_, V2)), V2) :- value(V2).
+
+eval(fst(T), T1) :- eval(T, T1).
+eval(snd(T), T1) :- eval(T, T1).
+
+eval(pair(T1, T2), pair(T11, T2)) :- eval(T1, T11).
+eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
+
 % eval(V, V) :- value(V).
 
 % Substitution
