@@ -35,14 +35,16 @@ eval(iszero(0), true).
 eval(iszero(succ(_)), false).
 eval(pred(0), 0).
 eval(pred(succ(NV)), NV).
-eval(app(lambda(X, Type, T1), V2), R) :- substitute(X, V2, T1, R)
 
 eval(if(T1, T2, T3), if(T11, T2, T3)) :- eval(T1, T11).
 eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
+
+eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R).
 eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
-eval(app(V1, T2), app(V1, T21)) :- value(V1), eval(T2, T21).
+eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
+% eval(V, V) :- value(V).
 
 % Substitution
 substitute(_, _, true, true).
