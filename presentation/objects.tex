@@ -4,6 +4,11 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 
+\usepackage{listings}
+\lstset{
+  basicstyle=\small\ttfamily,
+}
+
 \usetikzlibrary{arrows.meta}
 
 \usepackage[sfdefault,book]{FiraSans} %% option 'sfdefault' activates Fira Sans as the default text font
@@ -91,14 +96,14 @@ barks(dog, cat) = dog.barks(cat)
 
 \begin{frame}{Inheritance}
   \centering
-    \begin{tikzpicture}[thick,>=Stealth,border=1cm]
-      \node[classbox] (interface) at (0,0) {\textbf{Animal}\\walk};
-      \node[classbox] (class1) at (-1, -2) {\textbf{Cat}\\meow\\\light{walk}};
-      \node[classbox] (class2) at (1, -2) {\textbf{Dog}\\bark\\\light{walk}};
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[classbox] (interface) at (0,0) {\textbf{Animal}\\walk};
+    \node[classbox] (class1) at (-1, -2) {\textbf{Cat}\\meow\\\light{walk}};
+    \node[classbox] (class2) at (1, -2) {\textbf{Dog}\\bark\\\light{walk}};
 
-      \draw[->] (class1) -- (interface);
-      \draw[->] (class2) -- (interface);
-    \end{tikzpicture}
+    \draw[->] (class1) -- (interface);
+    \draw[->] (class2) -- (interface);
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Open recursion}
@@ -108,7 +113,82 @@ barks(dog, cat) = dog.barks(cat)
 
 \section{Objects}
 
+\begin{frame}[fragile]
+  \centering
+  An object is just a record of functions
+
+    \begin{lstlisting}[mathescape=true]
+    c = let x = ref 1 in
+        {get = $\lambda$_:Unit. !x
+         inc = $\lambda$_:Unit. x := succ(!x)};
+    \end{lstlisting}
+
+    \texttt{let x = .. in ..} provides encapsulation.
+\end{frame}
+
+\begin{frame}[fragile]{Constructors}
+  \centering
+  \begin{lstlisting}[mathescape=true]
+    newCounter =
+      $\lambda$_:Unit. let x = ref 1 in
+        {get = $\lambda$_:Unit. !x,
+         inc = $\lambda$_:Unit. x:=succ(!x)};
+  \end{lstlisting}
+
+  \begin{lstlisting}
+    Counter = { get : Unit -> Nat, inc : Unit -> Unit }
+  \end{lstlisting}
+\end{frame}
+
+\newcommand{\addedline}[1]{\tikz{\node[fill=green]{#1}}}
+
+\begin{frame}[fragile]{Subtyping}
+  \centering
+  \begin{block}{ }
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    newResetCounter =
+      $\lambda$_:Unit. let x = ref 1 in
+        {get = $\lambda$_:Unit. !x,
+         inc = $\lambda$_:Unit. x:=succ(!x),
+         (*\addedline{reset := $\lambda$\_:Unit. x:=1}*)};
+  \end{lstlisting}
+  \end{block}
+
+  \centering
+  \begin{lstlisting}
+    ResetCounter =
+    { get : Unit -> Nat,
+      inc : Unit -> Unit,
+      reset : Unit -> Unit}
+  \end{lstlisting}
+
+  \centering
+  \texttt{ResetCounter <: Counter} because of \textsc{RcdWidth}
+
+\end{frame}
+
 \section{Classes}
+
+\begin{frame}
+  \centering
+  A \textbf{class} is a \textbf{function} on \textbf{instance records}
+
+\end{frame}
+
+\begin{frame}{Inheritance}
+  \centering
+  \texttt{super} is defined by calling the class on the record
+\end{frame}
+
+\begin{frame}[fragile]{Inheritance}
+  \centering
+  \begin{lstlisting}[mathescape=true, escapeinside={(*}{*)}]
+    counterClass =
+      (*\addedline{$\lambda$r:CounterRep.}*)
+        {get = $\lambda$_:Unit. !(r.x),
+         inc = $\lambda$_:Unit. r.x := succ(!(r.x))};
+  \end{lstlisting}
+\end{frame}
 
 \section{Open Recursion}
 
