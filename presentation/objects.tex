@@ -2,11 +2,18 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{tikz}
+
+\usetikzlibrary{arrows.meta}
 
 \usepackage[sfdefault,book]{FiraSans} %% option 'sfdefault' activates Fira Sans as the default text font
-\usepackage[T1]{fontenc}
+\usepackage{FiraMono}
+
 \renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
 
+\usepackage{color}
+\definecolor{light}{rgb}{0.5, 0.5, 0.5}
+\def\light#1{{\color{light}#1}}
 
 \author{Noric Couderc}
 \date{\today}
@@ -17,15 +24,90 @@
 
 \maketitle
 
+\section{Intro}
 \begin{frame}
   \begin{itemize}
   \item What is object oriented programming?
   \item How to implement OOP in our language?
   \end{itemize}
-
 \end{frame}
 
-\begin{frame}
+\section{Object Oriented Programming}
 
+\section{Objects}
+\begin{frame}{Five rules of object-oriented programming}
+\begin{itemize}
+\item Multiple Representations
+\item Encapsulation
+\item Subtyping
+\item Inheritance
+\item Open recursion
+\end{itemize}
 \end{frame}
+
+\begin{frame}[fragile]{Multiple representations}
+\begin{block}{Dynamic dispatch}
+\begin{verbatim}
+walks(dog)
+\end{verbatim}
+\begin{verbatim}
+walks(cat)
+\end{verbatim}
+\end{block}
+
+\begin{block}{Syntactic sugar}
+\begin{verbatim}
+barks(dog, cat) = dog.barks(cat)
+\end{verbatim}
+\end{block}
+\end{frame}
+
+\begin{frame}{Encapsulation}
+  \centering
+  Objects have an \textbf{inside} and an \textbf{outside}\\
+  If you're \textbf{outside} you can't see \textbf{inside}
+\end{frame}
+
+\tikzset{
+  classbox/.style={
+    rectangle,
+    draw,
+    text width=1.5cm,
+    text centered,
+    },
+}
+
+\begin{frame}{Subtyping}
+  \centering
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[classbox] (interface) at (0,0) {Animal};
+    \node[classbox] (class1) at (-1, -2) {Cat};
+    \node[classbox] (class2) at (1, -2) {Dog};
+
+    \draw[->] (class1) -- (interface);
+    \draw[->] (class2) -- (interface);
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Inheritance}
+  \centering
+    \begin{tikzpicture}[thick,>=Stealth,border=1cm]
+      \node[classbox] (interface) at (0,0) {\textbf{Animal}\\walk};
+      \node[classbox] (class1) at (-1, -2) {\textbf{Cat}\\meow\\\light{walk}};
+      \node[classbox] (class2) at (1, -2) {\textbf{Dog}\\bark\\\light{walk}};
+
+      \draw[->] (class1) -- (interface);
+      \draw[->] (class2) -- (interface);
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Open recursion}
+  \centering
+  Methods of an object can call each other
+\end{frame}
+
+\section{Classes}
+
+\section{Open Recursion}
+
 \end{document}
