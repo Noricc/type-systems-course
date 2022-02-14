@@ -1,4 +1,4 @@
-\documentclass[presentation]{beamer}
+\documentclass[presentation,xcolor=svgnames]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -17,7 +17,7 @@
 
 \renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
 
-\usepackage{xcolor}
+% \usepackage[dvipsnames]{xcolor}
 \definecolor{light}{rgb}{0.5, 0.5, 0.5}
 \def\light#1{{\color{light}#1}}
 
@@ -115,8 +115,7 @@ barks(dog, cat) = dog.barks(cat)
 \section{Objects}
 
 \begin{frame}[fragile]
-  \centering
-  An object is just a record of functions
+  An object is just a record of functions / methods
 
     \begin{lstlisting}[mathescape=true]
     c = let x = ref 1 in
@@ -147,7 +146,7 @@ barks(dog, cat) = dog.barks(cat)
 
 % \newcommand{\addedline}[1]{\tikz{\node[fill=green,inner sep=0pt]{#1}}}
 
-\newcommand{\addedline}[1]{\colorbox{green}{#1}}}
+\newcommand{\addedline}[1]{\colorbox{green}{#1}}
 
 \begin{frame}[fragile]{Subtyping}
   Adding a method to a record creates a subtype
@@ -183,23 +182,102 @@ barks(dog, cat) = dog.barks(cat)
   \end{block}
 \end{frame}
 
-\end{frame}
-
-\begin{frame}{Inheritance}
-  \centering
-  \texttt{super} is defined by calling the class on the record
-\end{frame}
-
-\begin{frame}[fragile]{Inheritance}
-  \centering
-  \begin{lstlisting}[mathescape=true, escapeinside={(*}{*)}]
+\begin{frame}[fragile]{Classes}
+  \begin{block}{Solution}
+    \begin{itemize}
+    \item A \textbf{class} is a \textbf{function} on \textbf{instance records}
+    \item Classes are \textbf{functions}, not \textbf{types}
+    \end{itemize}
+  \end{block}
+  \begin{lstlisting}[escapeinside={(*}{*)}]
+    (*\addedline{counterRep = \{ x : Ref Nat\};}*)
+  \end{lstlisting}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     counterClass =
-      (*\addedline{$\lambda$r:CounterRep.}*)
-        {get = $\lambda$_:Unit. !(r.x),
+      $\lambda$(*\addedline{r:CounterRep}*).
+        {get = $\lambda$_:Unit !(r.x),
          inc = $\lambda$_:Unit. r.x := succ(!(r.x))};
+
+    counterClass : CounterRep -> Counter
   \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]{Inheritance}
+  Call the class on the instance record to get \texttt{super}
+
+  % Could use colors for SELF, SUPER, and the INSTANCE RECORD
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    resetCounterClass =
+      $\lambda$r:CounterRep.
+      (*\addedline{let super = counterClass r in}*)
+        {get=(*\addedline{super.get}*),
+         inc=(*\addedline{super.inc}*),
+         (*\addedline{reset = $\lambda$\_:Unit. r.x := 1\}}*)
+  \end{lstlisting}
+
+  \begin{block}{}
+  \texttt{reset} and \texttt{super.get} use the same \texttt{r.x}!
+  \end{block}
+
+\end{frame}
+
 \section{Open Recursion}
+
+\begin{frame}
+  \centering
+  \huge \textbf{A frame}
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: Fix}
+  \begin{lstlisting}[mathescape=true]
+    setCounterClass =
+    $\lambda$r:CounterRep.
+      fix
+        ($\lambda$self: SetCounter.
+          {get=$\lambda$_:Unit. !(r.x),
+           set=$\lambda$i:Nat. r.x := i,
+           inc=$\lambda$_:Unit.
+               r.x := self.set (succ (self.get unit))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: Fix: Problems}
+  \begin{block}{Problem}
+    Calling \texttt{fix} creates an infinite loop!
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Reminder: Recursion}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    (*\textcolor{red}{iseven}*) =
+      $\lambda$x:Nat.
+        if iszero x then true
+        else if iszero (pred x) then false
+        else (*\textcolor{red}{iseven}*) (pred(pred x))
+  \end{lstlisting}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    (*\textcolor{red}{iseven}*) =
+      (*\addedline{fix}*)
+      (*\addedline{$\lambda$ie:Nat -> Bool}*)
+        $\lambda$x:Nat.
+          if iszero x then true
+          else if iszero (pred x) then false
+          else (*\textcolor{ForestGreen}{ie}*) (pred(pred x))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: Fix: Thunking}
+  \textbf{Thunking} is when \emph{delay} a computation by wrapping it in a function.
+
+  \begin{block}{Example}
+    $3 + 2 \rightarrow \lambda \_. (3 + 2)$
+  \end{block}
+
+  The body will be evaluated when you call the function!
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: References}
+references
+\end{frame}
 
 \end{document}
