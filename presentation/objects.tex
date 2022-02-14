@@ -7,6 +7,7 @@
 \usepackage{listings}
 \lstset{
   basicstyle=\small\ttfamily,
+  gobble=4,
 }
 
 \usetikzlibrary{arrows.meta}
@@ -16,7 +17,7 @@
 
 \renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
 
-\usepackage{color}
+\usepackage{xcolor}
 \definecolor{light}{rgb}{0.5, 0.5, 0.5}
 \def\light#1{{\color{light}#1}}
 
@@ -124,10 +125,14 @@ barks(dog, cat) = dog.barks(cat)
     \end{lstlisting}
 
     \texttt{let x = .. in ..} provides encapsulation.
+
 \end{frame}
 
 \begin{frame}[fragile]{Constructors}
-  \centering
+  \begin{lstlisting}
+    Counter = { get : Unit -> Nat, inc : Unit -> Unit }
+  \end{lstlisting}
+
   \begin{lstlisting}[mathescape=true]
     newCounter =
       $\lambda$_:Unit. let x = ref 1 in
@@ -136,14 +141,16 @@ barks(dog, cat) = dog.barks(cat)
   \end{lstlisting}
 
   \begin{lstlisting}
-    Counter = { get : Unit -> Nat, inc : Unit -> Unit }
+    newCounter : Unit -> Counter
   \end{lstlisting}
 \end{frame}
 
-\newcommand{\addedline}[1]{\tikz{\node[fill=green]{#1}}}
+% \newcommand{\addedline}[1]{\tikz{\node[fill=green,inner sep=0pt]{#1}}}
+
+\newcommand{\addedline}[1]{\colorbox{green}{#1}}}
 
 \begin{frame}[fragile]{Subtyping}
-  \centering
+  Adding a method to a record creates a subtype
   \begin{block}{ }
   \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     newResetCounter =
@@ -154,7 +161,6 @@ barks(dog, cat) = dog.barks(cat)
   \end{lstlisting}
   \end{block}
 
-  \centering
   \begin{lstlisting}
     ResetCounter =
     { get : Unit -> Nat,
@@ -162,16 +168,20 @@ barks(dog, cat) = dog.barks(cat)
       reset : Unit -> Unit}
   \end{lstlisting}
 
-  \centering
   \texttt{ResetCounter <: Counter} because of \textsc{RcdWidth}
 
 \end{frame}
 
 \section{Classes}
 
-\begin{frame}
-  \centering
-  A \textbf{class} is a \textbf{function} on \textbf{instance records}
+\begin{frame}{Classes}
+  \begin{block}{Problems}
+    \begin{itemize}
+    \item We have to write the methods again!
+    \item We can't use assignment for copying methods
+    \end{itemize}
+  \end{block}
+\end{frame}
 
 \end{frame}
 
