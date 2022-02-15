@@ -25,6 +25,13 @@
 \date{\today}
 \title{Case Study: Imperative Objects}
 
+\newcommand{\sectionframe}[1]{
+  \begin{frame}
+    \centering
+    \huge \textbf{#1}
+  \end{frame}
+}
+
 \begin{document}
 
 
@@ -112,18 +119,32 @@ barks(dog, cat) = dog.barks(cat)
   Methods of an object can call each other
 \end{frame}
 
+\begin{frame}{This chapter}
+  \begin{block}{This chapter}
+    We're going to implement OOP with our functional language
+  \end{block}
+
+  \begin{block}{Common trick}
+    When stuck, wrap in a function
+  \end{block}
+
+\end{frame}
+
 \section{Objects}
 
 \begin{frame}[fragile]
-  An object is just a record of functions / methods
-
+  \begin{block}{An object is just a record of functions / methods}
     \begin{lstlisting}[mathescape=true]
     c = let x = ref 1 in
         {get = $\lambda$_:Unit. !x
          inc = $\lambda$_:Unit. x := succ(!x)};
     \end{lstlisting}
+  \end{block}
 
+  \begin{block}{Encapsulation}
     \texttt{let x = .. in ..} provides encapsulation.
+  \end{block}
+
 
 \end{frame}
 
@@ -146,11 +167,10 @@ barks(dog, cat) = dog.barks(cat)
 
 % \newcommand{\addedline}[1]{\tikz{\node[fill=green,inner sep=0pt]{#1}}}
 
-\newcommand{\addedline}[1]{\colorbox{green}{#1}}
+\newcommand{\addedline}[1]{\colorbox{ForestGreen}{\texttt{#1}}}
 
 \begin{frame}[fragile]{Subtyping}
-  Adding a method to a record creates a subtype
-  \begin{block}{ }
+  \begin{block}{Adding a method to a record creates a subtype}
   \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     newResetCounter =
       $\lambda$_:Unit. let x = ref 1 in
@@ -171,14 +191,21 @@ barks(dog, cat) = dog.barks(cat)
 
 \end{frame}
 
-\section{Classes}
+\sectionframe{Classes}
 
-\begin{frame}{Classes}
+\begin{frame}[fragile]{Classes}
   \begin{block}{Problems}
     \begin{itemize}
     \item We have to write the methods again!
     \item We can't use assignment for copying methods
     \end{itemize}
+    \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+      newResetCounter =
+        $\lambda$_:Unit. let x = ref 1 in
+        {(*\colorbox{DarkRed}{get = $\lambda$\_:Unit. !x}*),
+         (*\colorbox{DarkRed}{inc = $\lambda$\_:Unit. x:=succ(!x)}*),
+         reset := $\lambda$_:Unit. x:=1};
+    \end{lstlisting}
   \end{block}
 \end{frame}
 
@@ -203,9 +230,9 @@ barks(dog, cat) = dog.barks(cat)
 \end{frame}
 
 \begin{frame}[fragile]{Inheritance}
-  Call the class on the instance record to get \texttt{super}
-
+  \begin{block}{Super}
   % Could use colors for SELF, SUPER, and the INSTANCE RECORD
+  Call the \textbf{super class} on the \textbf{instance record}
   \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     resetCounterClass =
       $\lambda$r:CounterRep.
@@ -218,26 +245,53 @@ barks(dog, cat) = dog.barks(cat)
   \begin{block}{}
   \texttt{reset} and \texttt{super.get} use the same \texttt{r.x}!
   \end{block}
-
+  \end{block}
 \end{frame}
 
 \section{Open Recursion}
 
-\begin{frame}
-  \centering
-  \huge \textbf{A frame}
+
+
+\sectionframe{Open Recursion}
+
+\begin{frame}[fragile]{Reminder: Recursion}
+  \begin{block}{Before}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    (*\textcolor{red}{iseven}*) =
+      $\lambda$x:Nat.
+        if iszero x then true
+        else if iszero (pred x) then false
+        else (*\textcolor{red}{iseven}*) (pred(pred x))
+  \end{lstlisting}
+  \end{block}
+
+  \begin{block}{After}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    (*\textcolor{ForestGreen}{iseven}*) =
+      (*\addedline{fix}*)
+      (*\addedline{$\lambda$ie:Nat -> Bool}*)
+        $\lambda$x:Nat.
+          if iszero x then true
+          else if iszero (pred x) then false
+          else (*\addedline{ie}*) (pred(pred x))
+  \end{lstlisting}
+  \end{block}
 \end{frame}
 
 \begin{frame}[fragile]{Open recursion: Fix}
-  \begin{lstlisting}[mathescape=true]
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     setCounterClass =
-    $\lambda$r:CounterRep.
-      fix
-        ($\lambda$self: SetCounter.
-          {get=$\lambda$_:Unit. !(r.x),
-           set=$\lambda$i:Nat. r.x := i,
-           inc=$\lambda$_:Unit.
-               r.x := self.set (succ (self.get unit))
+      $\lambda$r:CounterRep.
+          ((*\addedline{$\lambda$self: SetCounter.}*)
+            {get=$\lambda$_:Unit. !(r.x),
+             (*\addedline{set=$\lambda$i:Nat. r.x := i}*),
+             (*\addedline{inc=$\lambda$\_:Unit.}*)
+                 (*\addedline{r.x := self.set (succ (self.get unit))\}}*)}
+  \end{lstlisting}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    newSetCounter =
+      $\lambda$_:Unit. let r = {x=ref 1} in
+        (*\addedline{(fix (setCounterClass r))}*)
   \end{lstlisting}
 \end{frame}
 
@@ -247,37 +301,175 @@ barks(dog, cat) = dog.barks(cat)
   \end{block}
 \end{frame}
 
-\begin{frame}[fragile]{Reminder: Recursion}
-  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
-    (*\textcolor{red}{iseven}*) =
-      $\lambda$x:Nat.
-        if iszero x then true
-        else if iszero (pred x) then false
-        else (*\textcolor{red}{iseven}*) (pred(pred x))
-  \end{lstlisting}
-  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
-    (*\textcolor{red}{iseven}*) =
-      (*\addedline{fix}*)
-      (*\addedline{$\lambda$ie:Nat -> Bool}*)
-        $\lambda$x:Nat.
-          if iszero x then true
-          else if iszero (pred x) then false
-          else (*\textcolor{ForestGreen}{ie}*) (pred(pred x))
-  \end{lstlisting}
-\end{frame}
+
 
 \begin{frame}[fragile]{Open recursion: Fix: Thunking}
-  \textbf{Thunking} is when \emph{delay} a computation by wrapping it in a function.
-
-  \begin{block}{Example}
-    $3 + 2 \rightarrow \lambda \_. (3 + 2)$
+  \begin{block}{Thunking}
+  \textbf{Thunking} is when you \emph{delay} a computation by wrapping it in a function.
   \end{block}
 
+  \begin{block}{Example}
+  $3 + 2 \rightarrow \lambda \_. (3 + 2)$
+
   The body will be evaluated when you call the function!
+  \end{block}
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: Fix}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    setCounterClass =
+      $\lambda$r:CounterRep.
+      (*\addedline{$\lambda$self: Unit -> SetCounter.}*)
+        (*\addedline{$\lambda$\_:Unit.}*)
+          {get=$\lambda$_:Unit. !(r.x),
+           set=$\lambda$i:Nat. r.x := i,
+           inc=$\lambda$_:Unit.
+             r.x :=
+               (*\addedline{(self unit)}*).set (succ (*\addedline{(self unit)}*).get unit))}
+  \end{lstlisting}
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    newSetCounter =
+      $\lambda$_:Unit. let r = {x=ref 1} in
+        (*\addedline{(fix (setCounterClass r) unit)}*)
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Open recursion: References}
-references
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    setCounterClass =
+      $\lambda$r:CounterRep.
+        (*\addedline{$\lambda$self: Ref SetCounter.}*)
+            {get=$\lambda$_:Unit. !(r.x),
+             set=$\lambda$i:Nat. r.x:=i;
+             inc=$\lambda$_:Unit.
+               (*\addedline{(!self)}*).set (succ ((*\addedline{(!self)}*).get unit))};
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Open recursion: References}
+  \begin{block}{The idea}
+    \begin{itemize}
+    \item Initialize ref to a dummy value
+    \item ``Tie the knot'' in constructor
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: References}
+  \begin{block}{The dummy value}
+    \begin{lstlisting}[mathescape=true]
+      dummySetCounter =
+      {get = $\lambda$_:Unit . 0,
+        set = $\lambda$i:Nat. unit,
+        inc = $\lambda$_:Unit unit}
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Open recursion: References}
+  \begin{block}{Tying the knot}
+    \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+      newSetCounter =
+        $\lambda$_:Unit.
+          let r = {x = ref 1} in
+          let (*\addedline{cAux = ref dummySetCounter}*) in
+            (*\addedline{(cAux := (setCounterClass r cAux); \!cAux)}*);
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+\tikzset{
+  obj/.style={
+    rectangle,
+    draw,
+    fill=grey!30,
+    },
+  ref./style={
+    rectangle,
+  }
+}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}
+    cAux = ref dummySetCounter
+    cAux := (setCounterClass r cAux);
+    !cAux
+  \end{lstlisting}
+
+  \begin{center}
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[obj] (dummy) at (5,0) {Dummy};
+    \node[ref] (cAux) at (0, 0) {cAux};
+    \draw[->] (cAux) -- (dummy);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}
+    cAux = ref dummySetCounter
+    cAux := (setCounterClass r cAux);
+    !cAux
+  \end{lstlisting}
+
+  \begin{center}
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[obj] (dummy) at (5,0) {Dummy};
+    \node[ref] (cAux) at (0, 0) {cAux};
+    \node[obj] (class) at (5, -2) {CounterClass};
+    \node[ref] (self) at (0, -2) {self};
+    \draw[->] (cAux) -- (dummy);
+    \draw[->] (self) -- (dummy);
+    \draw[-] (self) -- node[left] {=} (cAux);
+    \draw[->] (class) edge[bend left] node[below]{uses} (self);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}
+    cAux = ref dummySetCounter
+    cAux := (setCounterClass r cAux);
+    !cAux
+  \end{lstlisting}
+
+  \begin{center}
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[obj] (dummy) at (5,0) {Dummy};
+    \node[ref] (cAux) at (0, 0) {cAux};
+    \node[obj] (class) at (5, -2) {CounterClass};
+    \node[ref] (self) at (0, -2) {self};
+    \draw[->] (cAux) -- (class);
+    \draw[->] (self) -- (dummy);
+    \draw[-] (self) -- node[left] {=} (cAux);
+    \draw[->] (class) edge[bend left] node[below]{uses} (self);
+  \end{tikzpicture}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}
+    cAux = ref dummySetCounter
+    cAux := (setCounterClass r cAux);
+    !cAux
+  \end{lstlisting}
+
+  \begin{center}
+  \begin{tikzpicture}[thick,>=Stealth]
+    \node[obj] (dummy) at (5,0) {Dummy};
+    \node[ref] (cAux) at (0, 0) {cAux};
+    \node[obj] (class) at (5, -2) {CounterClass};
+    \node[ref] (self) at (0, -2) {self};
+    \draw[->] (cAux) -- (class);
+    \draw[->] (self) -- (class);
+    \draw[-] (self) -- node[left] {=} (cAux);
+    \draw[->] (class) edge[bend left] node[below]{uses} (self);
+  \end{tikzpicture}
+  \end{center}
+
 \end{frame}
 
 \end{document}
