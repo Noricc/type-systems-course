@@ -28,7 +28,7 @@
 \newcommand{\sectionframe}[1]{
   \begin{frame}
     \centering
-    \huge \textbf{#1}
+    \huge \usebeamercolor[fg]{structure} \textbf{#1}
   \end{frame}
 }
 
@@ -39,10 +39,13 @@
 
 \section{Intro}
 \begin{frame}
+  \begin{block}{This Chapter}
   \begin{itemize}
   \item What is object oriented programming?
-  \item How to implement OOP in our language?
+  \item What do we need to implement OOP?
+  \item How to implement it?
   \end{itemize}
+  \end{block}
 \end{frame}
 
 \section{Object Oriented Programming}
@@ -59,18 +62,23 @@
 \end{frame}
 
 \begin{frame}[fragile]{Multiple representations}
+  \centering
+  One \textbf{interface}, several implementations
+\end{frame}
+
+\begin{frame}[fragile]{Multiple representations}
 \begin{block}{Dynamic dispatch}
 \begin{verbatim}
-walks(dog)
+walk(dog)
 \end{verbatim}
 \begin{verbatim}
-walks(cat)
+walk(cat)
 \end{verbatim}
 \end{block}
 
 \begin{block}{Syntactic sugar}
 \begin{verbatim}
-barks(dog, cat) = dog.barks(cat)
+bark(dog, cat) = dog.bark(cat)
 \end{verbatim}
 \end{block}
 \end{frame}
@@ -119,18 +127,9 @@ barks(dog, cat) = dog.barks(cat)
   Methods of an object can call each other
 \end{frame}
 
-\begin{frame}{This chapter}
-  \begin{block}{This chapter}
-    We're going to implement OOP with our functional language
-  \end{block}
 
-  \begin{block}{Common trick}
-    When stuck, wrap in a function
-  \end{block}
 
-\end{frame}
-
-\section{Objects}
+\sectionframe{Objects}
 
 \begin{frame}[fragile]
   \begin{block}{An object is just a record of functions / methods}
@@ -194,7 +193,7 @@ barks(dog, cat) = dog.barks(cat)
 \sectionframe{Classes}
 
 \begin{frame}[fragile]{Classes}
-  \begin{block}{Problems}
+  \begin{block}{Problem}
     \begin{itemize}
     \item We have to write the methods again!
     \item We can't use assignment for copying methods
@@ -207,6 +206,16 @@ barks(dog, cat) = dog.barks(cat)
          reset := $\lambda$_:Unit. x:=1};
     \end{lstlisting}
   \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \huge
+    \textbf{The trick}
+
+    \regular
+    When stuck, make it a function
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Classes}
@@ -286,7 +295,7 @@ barks(dog, cat) = dog.barks(cat)
             {get=$\lambda$_:Unit. !(r.x),
              (*\addedline{set=$\lambda$i:Nat. r.x := i}*),
              (*\addedline{inc=$\lambda$\_:Unit.}*)
-                 (*\addedline{r.x := self.set (succ (self.get unit))\}}*)}
+                 (*\addedline{r.x := self.set (succ (self.get unit))}*)}
   \end{lstlisting}
   \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     newSetCounter =
@@ -336,6 +345,8 @@ barks(dog, cat) = dog.barks(cat)
   \end{lstlisting}
 \end{frame}
 
+\sectionframe{Open recursion with References}
+
 \begin{frame}[fragile]{Open recursion: References}
   \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
     setCounterClass =
@@ -361,9 +372,9 @@ barks(dog, cat) = dog.barks(cat)
   \begin{block}{The dummy value}
     \begin{lstlisting}[mathescape=true]
       dummySetCounter =
-      {get = $\lambda$_:Unit . 0,
+      {get = $\lambda$_:Unit. 0,
         set = $\lambda$i:Nat. unit,
-        inc = $\lambda$_:Unit unit}
+        inc = $\lambda$_:Unit. unit}
     \end{lstlisting}
   \end{block}
 \end{frame}
@@ -375,7 +386,7 @@ barks(dog, cat) = dog.barks(cat)
         $\lambda$_:Unit.
           let r = {x = ref 1} in
           let (*\addedline{cAux = ref dummySetCounter}*) in
-            (*\addedline{(cAux := (setCounterClass r cAux); \!cAux)}*);
+            (*\addedline{(cAux := (setCounterClass r cAux); !cAux)}*);
     \end{lstlisting}
   \end{block}
 \end{frame}
@@ -392,10 +403,9 @@ barks(dog, cat) = dog.barks(cat)
 }
 
 \begin{frame}[fragile]
-  \begin{lstlisting}
-    cAux = ref dummySetCounter
+  \begin{lstlisting}[escapeinside={(*}{*)}]
+    (*\addedline{cAux = ref dummySetCounter}*)
     cAux := (setCounterClass r cAux);
-    !cAux
   \end{lstlisting}
 
   \begin{center}
@@ -408,10 +418,9 @@ barks(dog, cat) = dog.barks(cat)
 \end{frame}
 
 \begin{frame}[fragile]
-  \begin{lstlisting}
+  \begin{lstlisting}[escapeinside={(*}{*)}]
     cAux = ref dummySetCounter
-    cAux := (setCounterClass r cAux);
-    !cAux
+    cAux := (*\addedline{(setCounterClass r cAux)}*);
   \end{lstlisting}
 
   \begin{center}
@@ -429,10 +438,9 @@ barks(dog, cat) = dog.barks(cat)
 \end{frame}
 
 \begin{frame}[fragile]
-  \begin{lstlisting}
+  \begin{lstlisting}[escapeinside={(*}{*)}]
     cAux = ref dummySetCounter
-    cAux := (setCounterClass r cAux);
-    !cAux
+    (*\addedline{cAux := (setCounterClass r cAux)}*);
   \end{lstlisting}
 
   \begin{center}
@@ -451,10 +459,9 @@ barks(dog, cat) = dog.barks(cat)
 \end{frame}
 
 \begin{frame}[fragile]
-  \begin{lstlisting}
+  \begin{lstlisting}[escapeinside={(*}{*)}]
     cAux = ref dummySetCounter
-    cAux := (setCounterClass r cAux);
-    !cAux
+    (*\addedline{cAux := (setCounterClass r cAux)}*);
   \end{lstlisting}
 
   \begin{center}
@@ -471,5 +478,38 @@ barks(dog, cat) = dog.barks(cat)
   \end{center}
 
 \end{frame}
+
+\begin{frame}[fragile]{Making subtyping work}
+  \begin{block}{Problem}
+    Subtyping doesn't allow to create objects!
+  \end{block}
+
+  \begin{block}{Solution}
+    Use a \texttt{Source} instead of a \texttt{Ref}
+  \end{block}
+
+  \begin{lstlisting}[mathescape=true,escapeinside={(*}{*)}]
+    setCounterClass =
+      $\lambda$r:CounterRep.
+        (*\addedline{$\lambda$self: Source SetCounter.}*)
+            {get=$\lambda$_:Unit. !(r.x),
+             set=$\lambda$i:Nat. r.x:=i;
+             inc=$\lambda$_:Unit.
+               (!self).set (succ ((!self).get unit))};
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Takeaway}
+    Typed lambda calculus + records + refs + subtyping is enough for OOP
+  \end{block}
+
+  \begin{block}{Question}
+    Do you think it was hard to find how?
+  \end{block}
+\end{frame}
+
+\sectionframe{Thank you!}
 
 \end{document}
