@@ -59,6 +59,7 @@ latex
 (define (latex exp)
   (match exp
     [`(consistent ,x ,y) (string-append (latex x) (latex-symbol "sim") (latex y))]
+    [`(restrict ,t ,t1) (format "~a|_{~a}" (latex t) (latex t1))]
     [`(inconsistent ,x ,y) (string-append (latex  x) (latex-symbol "nsim") (latex y))]
     [(list 'object method ...) (format "[~a]" (string-join (map latex method) ",~"))]
     [`(method ,name (signature ,it ,ot)) (latex `(has-type ,name (fun-type ,it ,ot)))]
@@ -85,12 +86,13 @@ latex
         (pict consequence)))]
     [`(and ,p1 ,p2) (hb-append 50.0 (pict p1) (pict p2))]
     [`(implies env ,cons) ($ (latex `(implies env ,cons)))]
-    [`(consistent ,x ,y) (hb-append (pict x) ($ (latex-symbol "sim")) (pict y))]
+    [`(inconsistent ,x ,y) ($ (latex `(inconsistent ,x ,y)))]
+    [`(consistent ,x ,y) ($ (latex `(consistent ,x ,y)))]
     [`(type-var ,t) ($ (latex `(type-var ,t)))]
     [`(subtype ,t1 ,t2) ($ (latex `(subtype ,t1 ,t2)))]
-    [`(type ,(? string? t)) ($ (latex `(type ,t)))]))
-
-  
+    [`(type ,(? string? t)) ($ (latex `(type ,t)))]
+    [`(dyn-type) ($ (latex '(dyn-type)))]
+    ))
 
 ;; PRESENTATION
 (define sub-type-table1
@@ -106,7 +108,7 @@ latex
                  sigma1
                  )
                 cc-superimpose
-                cb-superimpose
+                cbl-superimpose
                 100
                 100))]
    ((compose
@@ -135,7 +137,7 @@ latex
                        ))
      ; The line
      (lambda (p)
-       (pin-line
+       (pin-arrows-line 10
         p
         sigma1
         lt-find
@@ -161,7 +163,7 @@ latex
                   sigma2
                   )
                  cc-superimpose
-                 cb-superimpose
+                 cbl-superimpose
                  100
                  100))]
     ((compose
@@ -190,7 +192,7 @@ latex
                         ))
       ; The line
       (lambda (p)
-        (pin-line
+        (pin-arrows-line 10
          p
          sigma2
          lt-find
@@ -202,6 +204,143 @@ latex
          )))
      combined
      )))
+
+(slide
+ #:title "The idea"
+ (item "add a type \"dynamic\":" (pict '(dyn-type)))
+ (item "add relations between types and" (pict '(dyn-type))))
+
+(slide
+ (item (pict '(consistent (type "int") (type "int"))))
+ (item (pict '(consistent (type "int") (dyn-type))))
+ (item ($ (latex '(consistent
+                   (fun-type (type "int") (dyn-type))
+                   (fun-type (dyn-type) (type "int"))))))
+ )
+
+(slide
+ ($ (latex '(consistent
+             (object
+              (method "x"
+                      (signature (type "int") (dyn-type)))
+              (method "y"
+                      (signature (dyn-type) (type "bool"))))
+             (object
+              (method "y"
+                      (signature (type "bool") (dyn-type)))
+              (method "x"
+                      (signature (dyn-type) (type "int"))))))))
+
+(slide
+ ($ (latex '(inconsistent
+             (object
+              (method "x"
+                      (signature (type "int") (type "int")))
+              (method "y"
+                      (signature (dyn-type) (dyn-type))))
+             (object
+              (method "x"
+                      (signature (type "int") (type "int"))))))))
+
+
+(define inconsistent-example
+  (let* [(note (t "different types"))
+         (spacing 200)]
+    ((compose
+      (lambda (p)
+        (linewidth 3 p))
+      (lambda (p)
+        (pin-over
+         ; Under
+         p
+         note
+         ct-find
+         (pip-arrow-line
+          -400
+          (* -1 spacing)
+          10)))
+      (lambda (p)
+        (pin-over
+         p
+         note
+         ct-find
+         (pip-arrow-line
+          150
+          (* -1 spacing)
+          10))))
+     ; Base drawing
+     (vc-append
+      200
+      ($ (latex '(inconsistent
+                  (object
+                   (method "x"
+                           (signature (type "int") (type "int")))
+                   (method "y"
+                           (signature (dyn-type) (type "bool"))))
+                  (object
+                   (method "x"
+                           (signature (type "bool") (type "int")))
+                   (method "y"
+                           (signature (dyn-type) (type "bool")))))))
+      note))))
+
+
+(slide
+ inconsistent-example)
+
+(slide
+ #:title "Restriction"
+ (item ($ (string-join (list
+                        (latex '(restrict (type "int")
+                                          (dyn-type)))
+                        (latex '(dyn-type)))
+                       "=")))
+ (item ($ (format "~a = ~a"
+                  (latex '(restrict (type "int")
+                                    (type "bool")))
+                  (latex '(type "int")))))
+ (item ($ (format "~a = ~a"
+                  (latex '(restrict (object
+                                     (method "x"
+                                             (signature (type "int") (type "int")))
+                                     (method "y"
+                                             (signature (type "int") (type "int"))))
+                                    (object
+                                     (method "x"
+                                             (signature (dyn-type) (dyn-type)))
+                                     (method "y"
+                                             (signature (type "int") (type "int"))))))
+                  (latex '(object
+                           (method "x"
+                                   (signature (dyn-type) (dyn-type)))
+                           (method "y"
+                                   (signature (type "int") (type "int")))))
+                  )))
+ )
+
+(slide
+ #:title "Type consistency"
+ 
+ 
+ )
+
+(slide
+ #:title "Properties"
+ (let [(sim ($ (latex-symbol "sim")))]
+   (vl-append
+     (item sim "reflexive")
+     (item sim "symmetric")
+     (item sim "not transitive"
+           (subitem (pict '(consistent (type "int") (dyn-type)))
+                    "and"
+                    (pict '(consistent (type "bool") (dyn-type)))
+                    "but"
+                    (pict '(inconsistent (type "bool") (type "int")))))
+     (item ($ (latex '(consistent (type-var "tau")
+                                  (restrict (type-var "tau")
+                                            (type-var "sigma"))))))
+ )))
+
 
 (slide
  (hc-append
