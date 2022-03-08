@@ -340,8 +340,8 @@ latex
         (combined
          (table 2
                 (list
-                 tau
                  (blank)
+                 tau
                  sigma
                  sigma1
                  )
@@ -358,10 +358,11 @@ latex
        (pin-arrow-line 10
                        p
                        sigma
-                       ct-find
+                       rt-find
                        tau
-                       cb-find
-                       #:label (scale ($ "\\lesssim") 0.8)))
+                       lb-find
+                       #:label (scale ($ "\\lesssim") 0.8)
+                       #:x-adjust-label -25))
      ; Second arrow
      (lambda (p)
        (pin-arrow-line 10
@@ -371,19 +372,18 @@ latex
                        sigma1
                        lbl-find
                        #:label (scale ($ "<:") 0.8)
-                       #:y-adjust-label 25
+                       #:y-adjust-label -10
                        ))
      ; The line
      (lambda (p)
        (pin-arrows-line 10
         p
         sigma1
-        lt-find
+        ct-find
         tau
-        rb-find
+        cb-find
         #:label (scale ($ (latex-symbol "sim")) 0.8)
-        #:x-adjust-label 10
-        #:y-adjust-label -10
+        #:x-adjust-label 25
      )))
     combined
    )))
@@ -395,8 +395,8 @@ latex
          (combined
           (table 2
                  (list
-                  tau
                   (blank)
+                  tau
                   sigma
                   sigma2
                   )
@@ -413,42 +413,110 @@ latex
         (pin-arrow-line 10
                         p
                         sigma
-                        ct-find
+                        rt-find
                         tau
-                        cb-find
-                        #:label (scale ($ "\\lesssim") 0.8)))
+                        lb-find
+                        #:label (scale ($ "\\lesssim") 0.8)
+                        #:x-adjust-label -25))
       ; Second arrow
       (lambda (p)
-        (pin-arrow-line 10
-                        p
-                        sigma
-                        rbl-find
-                        sigma2
-                        lbl-find
-                        #:label (scale ($ (latex-symbol "sim")) 0.8)
-                        #:y-adjust-label 25
+        (pin-arrows-line 10
+                         p
+                         sigma
+                         rbl-find
+                         sigma2
+                         lbl-find
+                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:y-adjust-label -10
                         ))
       ; The line
       (lambda (p)
-        (pin-arrows-line 10
+        (pin-arrow-line 10
          p
          sigma2
-         lt-find
+         ct-find
          tau
-         rb-find
+         cb-find
          #:label (scale ($ "<:") 0.8)
-         #:x-adjust-label 10
-         #:y-adjust-label -10
+         #:x-adjust-label 25
          )))
      combined
      )))
 
 (slide
- (bt "Consistency and Subtyping")
+ (bt "Consistent subtyping")
  (hc-append
   sub-type-table1
   (vline 100 200)
   sub-type-table2))
 
+;; Section 5: Ob<:?
+(define gradual-type-system-pict
+  ($ "\\textbf{Ob}_{<:}^{?}"))
+
+(define intermediate-type-system-pict
+  ($ "\\textbf{Ob}_{<:}^{\\langle\\cdot\\rangle}"))
+
+;; Section 6: Ob<:<.>
+(define sub-type-table3
+  (let* [(tau    (inset (fast-pict '(type-var "tau")) 10))
+         (sigma  (inset (fast-pict '(type-var "sigma")) 10))
+         (rho (inset (fast-pict '(type-var "rho")) 10))
+         (combined
+          (table 2
+                 (list
+                  (blank)
+                  tau
+                  sigma
+                  rho
+                  )
+                 cc-superimpose
+                 cbl-superimpose
+                 100
+                 100))]
+    ((compose
+      ; Set linewidth
+      (lambda (p)
+        (linewidth 3 p))
+      ; First arrow
+      (lambda (p)
+        (pin-arrow-line 10
+                        p
+                        sigma
+                        rt-find
+                        tau
+                        lb-find
+                        #:label (scale ($ "\\lesssim") 0.8)
+                        #:x-adjust-label -25))
+      ; Second arrow
+      (lambda (p)
+        (pin-arrows-line 10
+                         p
+                         sigma
+                         rbl-find
+                         rho
+                         lbl-find
+                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:y-adjust-label -10
+                        ))
+      ; The line
+      (lambda (p)
+        (pin-arrow-line 10
+         p
+         rho
+         ct-find
+         tau
+         cb-find
+         #:label (scale ($ "<:") 0.8)
+         #:x-adjust-label 25
+         )))
+     combined
+     )))
+
+(slide
+ (hbl-append 20 (bt "Two ways to") ($ "\\lesssim"))
+ sub-type-table3
+ 'next
+ (t "Insert type casts"))
 
 (tidy-latex-cache)
