@@ -202,6 +202,61 @@ latex
  (item "add a type \"dynamic\":" (fast-pict '(dyn-type)))
  (item "add relations between types and" (fast-pict '(dyn-type))))
 
+(slide
+ #:title "Restriction"
+ (item "Notation:" ($ "\\sigma|_{\\tau}"))
+ 'next
+ (item "Slogan: More question marks")
+ 'next
+ (item ($ (string-join (list
+                        (latex '(restrict (type "int")
+                                          (dyn-type)))
+                        (latex '(dyn-type)))
+                       "=")))
+ 'next
+ (item ($ (format "~a = ~a"
+                  (latex '(restrict (type "int")
+                                    (type "bool")))
+                  (latex '(type "int")))))
+)
+
+(slide
+ #:title "Restriction II"
+ (t "Object with two methods x and y")
+ 'next
+ ($ (latex '(restrict (object
+                       (method "x"
+                               (signature (type "int") (type "int")))
+                       (method "y"
+                               (signature (type "int") (type "int"))))
+                      (object
+                       (method "x"
+                               (signature (dyn-type) (dyn-type)))
+                       (method "y"
+                               (signature (type "int") (type "int")))))))
+ 'next
+ (t "=")
+ 'next
+ ($ (latex '(object
+             (method "x"
+                     (signature (dyn-type) (dyn-type)))
+             (method "y"
+                     (signature (type "int") (type "int")))))
+    ))
+
+(slide
+ #:title "Type consistency"
+ ($ (latex '(consistent (type-var "sigma")
+                        (type-var "tau"))))
+ 'next
+ (t "=")
+ ($ (format "~a = ~a "
+            (latex '(restrict (type-var "sigma")
+                              (type-var "tau")))
+            (latex '(restrict (type-var "tau")
+                              (type-var "sigma")))))
+ )
+
 
 (slide
  (item (fast-pict '(consistent (type "int") (type "int"))))
@@ -279,41 +334,9 @@ latex
 (slide
  inconsistent-example)
 
-(slide
- #:title "Restriction"
- (item ($ (string-join (list
-                        (latex '(restrict (type "int")
-                                          (dyn-type)))
-                        (latex '(dyn-type)))
-                       "=")))
- (item ($ (format "~a = ~a"
-                  (latex '(restrict (type "int")
-                                    (type "bool")))
-                  (latex '(type "int")))))
- (item ($ (format "~a = ~a"
-                  (latex '(restrict (object
-                                     (method "x"
-                                             (signature (type "int") (type "int")))
-                                     (method "y"
-                                             (signature (type "int") (type "int"))))
-                                    (object
-                                     (method "x"
-                                             (signature (dyn-type) (dyn-type)))
-                                     (method "y"
-                                             (signature (type "int") (type "int"))))))
-                  (latex '(object
-                           (method "x"
-                                   (signature (dyn-type) (dyn-type)))
-                           (method "y"
-                                   (signature (type "int") (type "int")))))
-                  )))
- )
 
-(slide
- #:title "Type consistency"
- 
- 
- )
+
+
 
 (slide
  #:title "Properties"
@@ -337,18 +360,19 @@ latex
  (let* [(tau    (inset (fast-pict '(type-var "tau")) 10))
         (sigma  (inset (fast-pict '(type-var "sigma")) 10))
         (sigma1 (inset (fast-pict '(type-var (prime "sigma"))) 10))
+        (sigma2 (inset (fast-pict '(type-var (second "sigma"))) 10))
         (combined
          (table 2
                 (list
-                 (blank)
+                 sigma2
                  tau
                  sigma
                  sigma1
                  )
                 cc-superimpose
                 cbl-superimpose
-                100
-                100))]
+                200
+                200))]
    ((compose
      ; Set linewidth
      (lambda (p)
@@ -364,91 +388,54 @@ latex
                        #:label (scale ($ "\\lesssim") 0.8)
                        #:x-adjust-label -25))
      ; Second arrow
-     (lambda (p)
-       (pin-arrow-line 10
-                       p
-                       sigma
-                       rbl-find
-                       sigma1
-                       lbl-find
-                       #:label (scale ($ "<:") 0.8)
-                       #:y-adjust-label -10
-                       ))
-     ; The line
-     (lambda (p)
-       (pin-arrows-line 10
-        p
-        sigma1
-        ct-find
-        tau
-        cb-find
-        #:label (scale ($ (latex-symbol "sim")) 0.8)
-        #:x-adjust-label 25
-     )))
-    combined
-   )))
-
-(define sub-type-table2
-  (let* [(tau    (inset (fast-pict '(type-var "tau")) 10))
-         (sigma  (inset (fast-pict '(type-var "sigma")) 10))
-         (sigma2 (inset (fast-pict '(type-var (second "sigma"))) 10))
-         (combined
-          (table 2
-                 (list
-                  (blank)
-                  tau
-                  sigma
-                  sigma2
-                  )
-                 cc-superimpose
-                 cbl-superimpose
-                 100
-                 100))]
-    ((compose
-      ; Set linewidth
       (lambda (p)
-        (linewidth 3 p))
-      ; First arrow
-      (lambda (p)
-        (pin-arrow-line 10
-                        p
-                        sigma
-                        rt-find
-                        tau
-                        lb-find
-                        #:label (scale ($ "\\lesssim") 0.8)
-                        #:x-adjust-label -25))
-      ; Second arrow
-      (lambda (p)
-        (pin-arrows-line 10
+         (pin-arrow-line 10
                          p
                          sigma
                          rbl-find
-                         sigma2
+                         sigma1
                          lbl-find
-                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:label (scale ($ "<:") 0.8)
                          #:y-adjust-label -10
-                        ))
-      ; The line
-      (lambda (p)
+                         #:color "darkred"
+                         ))
+     ; Third arrow
+     (lambda (p)
+        (pin-arrows-line 10
+                         p
+                         sigma
+                         ct-find
+                         sigma2
+                         cb-find
+                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:x-adjust-label -25
+                         #:color "steelblue"))
+     (lambda (p)
         (pin-arrow-line 10
-         p
-         sigma2
-         ct-find
-         tau
-         cb-find
-         #:label (scale ($ "<:") 0.8)
-         #:x-adjust-label 25
-         )))
-     combined
-     )))
+                       p
+                       sigma2
+                       rbl-find
+                       tau
+                       lbl-find
+                       #:label (scale ($ "<:") 0.8)
+                       #:y-adjust-label -10
+                       #:color "darkred"))
+     (lambda (p)
+        (pin-arrows-line 10
+                         p
+                         sigma1
+                         ct-find
+                         tau
+                         cb-find
+                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:x-adjust-label 25
+                         #:color "steelblue")))
+    combined
+   )))
 
 (slide
  (bt "Consistent subtyping")
- (hc-append
-  sub-type-table1
-  (vline 100 200)
-  sub-type-table2))
+  sub-type-table1)
 
 ;; Section 5: Ob<:?
 (define gradual-type-system-pict
@@ -518,5 +505,11 @@ latex
  sub-type-table3
  'next
  (t "Insert type casts"))
+
+;; Section 7, type system is safe
+(slide
+ (ltx-concat gradual-type-system-pict (t "=")
+             intermediate-type-system-pict (t "+") (t "casts"))
+ )
 
 (tidy-latex-cache)
