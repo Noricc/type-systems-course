@@ -357,10 +357,11 @@ latex
 
 
 (define sub-type-table1
- (let* [(tau    (inset (fast-pict '(type-var "tau")) 10))
-        (sigma  (inset (fast-pict '(type-var "sigma")) 10))
-        (sigma1 (inset (fast-pict '(type-var (prime "sigma"))) 10))
-        (sigma2 (inset (fast-pict '(type-var (second "sigma"))) 10))
+ (let* [(node (λ (label) (cc-superimpose (blank 100 100) label)))
+        (tau    (node (fast-pict '(type-var "tau"))))
+        (sigma  (node (fast-pict '(type-var "sigma"))))
+        (sigma1 (node (fast-pict '(type-var (prime "sigma")))))
+        (sigma2 (node (fast-pict '(type-var (second "sigma")))))
         (combined
          (table 2
                 (list
@@ -392,9 +393,9 @@ latex
          (pin-arrow-line 10
                          p
                          sigma
-                         rbl-find
+                         rc-find
                          sigma1
-                         lbl-find
+                         lc-find
                          #:label (scale ($ "<:") 0.8)
                          #:y-adjust-label -10
                          #:color "darkred"
@@ -414,9 +415,9 @@ latex
         (pin-arrow-line 10
                        p
                        sigma2
-                       rbl-find
+                       rc-find
                        tau
-                       lbl-find
+                       lc-find
                        #:label (scale ($ "<:") 0.8)
                        #:y-adjust-label -10
                        #:color "darkred"))
