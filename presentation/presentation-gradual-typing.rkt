@@ -156,7 +156,8 @@ latex
 
 (slide
  (bt "Gradual typing for Objects")
- (t "Noric Couderc"))
+ (t "Paper: Siek and Taha")
+ (t "Presentation: Noric Couderc"))
 
 (slide
  #:title "The Problem"
@@ -184,6 +185,7 @@ latex
 
 (slide
  #:title "Alternatives"
+ 'next
  (item "Type inference")
  'next
  (subitem "Must typecheck before run")
@@ -200,13 +202,28 @@ latex
 (slide
  #:title "The idea"
  (item "add a type \"dynamic\":" (fast-pict '(dyn-type)))
+ (subitem "Means \"I don't know the type yet\"")
  (item "add relations between types and" (fast-pict '(dyn-type))))
+
+
+(slide
+ #:title "Subtyping"
+ (item (fast-pict '(subtype (type "int") (type "int"))))
+ (item (fast-pict '(subtype (type "float") (type "float"))))
+ (item (fast-pict '(subtype (type "bool") (type "bool"))))
+ 'next
+ (item (fast-pict '(subtype (dyn-type) (dyn-type))))
+ 'next
+ (item (fast-pict '(subtype (type "int") (type "float"))))
+ 'next
+ (item ($ "[{l_i : s_i}^{i \\in 1 \\dots n+m}] <: [{l_i : s_i}^{i \\in 1 \\dots n}]"))
+ )
 
 (slide
  #:title "Restriction"
  (item "Notation:" ($ "\\sigma|_{\\tau}"))
  'next
- (item "Slogan: More question marks")
+ (subitem "Slogan: More question marks")
  'next
  (item ($ (string-join (list
                         (latex '(restrict (type "int")
@@ -352,6 +369,7 @@ latex
  )))
 
 
+
 (define sub-type-table1
  (let* [(node (λ (label) (cc-superimpose (blank 100 100) label)))
         (tau    (node (fast-pict '(type-var "tau"))))
@@ -431,23 +449,8 @@ latex
    )))
 
 (slide
- (bt "Consistent subtyping")
-  sub-type-table1)
-
-(slide
- (bt "Subtyping")
- 'next
- (item (fast-pict '(subtype (type "int") (type "int"))))
- (item (fast-pict '(subtype (type "float") (type "float"))))
- (item (fast-pict '(subtype (type "bool") (type "bool"))))
- 'next
- (item (fast-pict '(subtype (dyn-type) (dyn-type))))
- 'next
- (item (fast-pict '(subtype (type "int") (type "float"))))
- 'next
- (item ($ "[{l_i : s_i}^{i \\in 1 \\dots n+m}] <: [{l_i : s_i}^{i \\in 1 \\dots n}]"))
- )
-  
+ #:title "Consistent subtyping"
+ sub-type-table1)
 
 ;; Section 5: Ob<:?
 (define gradual-type-system-pict
@@ -525,5 +528,12 @@ latex
  (ltx-concat gradual-type-system-pict (t "=")
              intermediate-type-system-pict (t "+") (t "casts"))
  )
+
+(slide
+ #:title "Contributions"
+ (item "Show that you need" (it "two") "relations")
+ (item "Proof that the type system is sound")
+ (subitem "Dynamic typing when types are omitted")
+ (subitem "Static typing when all methods parameters annotated"))
 
 (tidy-latex-cache)
