@@ -334,10 +334,6 @@ latex
 (slide
  inconsistent-example)
 
-
-
-
-
 (slide
  #:title "Properties"
  (let [(sim ($ (latex-symbol "sim")))]
@@ -438,6 +434,21 @@ latex
  (bt "Consistent subtyping")
   sub-type-table1)
 
+(slide
+ (bt "Subtyping")
+ 'next
+ (item (fast-pict '(subtype (type "int") (type "int"))))
+ (item (fast-pict '(subtype (type "float") (type "float"))))
+ (item (fast-pict '(subtype (type "bool") (type "bool"))))
+ 'next
+ (item (fast-pict '(subtype (dyn-type) (dyn-type))))
+ 'next
+ (item (fast-pict '(subtype (type "int") (type "float"))))
+ 'next
+ (item ($ "[{l_i : s_i}^{i \\in 1 \\dots n+m}] <: [{l_i : s_i}^{i \\in 1 \\dots n}]"))
+ )
+  
+
 ;; Section 5: Ob<:?
 (define gradual-type-system-pict
   ($ "\\textbf{Ob}_{<:}^{?}"))
@@ -460,8 +471,8 @@ latex
                   )
                  cc-superimpose
                  cbl-superimpose
-                 100
-                 100))]
+                 150
+                 150))]
     ((compose
       ; Set linewidth
       (lambda (p)
@@ -478,25 +489,27 @@ latex
                         #:x-adjust-label -25))
       ; Second arrow
       (lambda (p)
-        (pin-arrows-line 10
+        (pin-arrow-line 10
                          p
                          sigma
                          rbl-find
                          rho
                          lbl-find
-                         #:label (scale ($ (latex-symbol "sim")) 0.8)
+                         #:label (scale ($ "<:") 0.8)
                          #:y-adjust-label -10
+                         #:color "darkred"
                         ))
       ; The line
       (lambda (p)
-        (pin-arrow-line 10
+        (pin-arrows-line 10
          p
          rho
          ct-find
          tau
          cb-find
-         #:label (scale ($ "<:") 0.8)
+         #:label (scale ($ (latex-symbol "sim"))  0.8)
          #:x-adjust-label 25
+         #:color "steelblue"
          )))
      combined
      )))
