@@ -14,6 +14,14 @@ term(app(T1, T2)) :- term(T1), term(T2).
 term(pair(T1, T2)) :- term(T1), term(T2).
 term(fst(T)) :- term(T).
 term(snd(T)) :- term(T).
+% "inject left" and "inject right"
+% I don't understand what "inject" means here.
+term(inl(Term, Type)) :- term(Term), type(Type).
+term(inr(Term, Type)) :- term(Term), type(Type).
+term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) :- term(Term),
+                                                        variable(LeftX), term(LeftTerm),
+                                                        variable(RightX), term(RightTerm).
+
 term(X) :- integer(X).
 term(X) :- variable(X).
 
