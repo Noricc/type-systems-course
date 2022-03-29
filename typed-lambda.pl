@@ -75,6 +75,19 @@ eval(snd(T), T1) :- eval(T, T1).
 eval(pair(T1, T2), pair(T11, T2)) :- eval(T1, T11).
 eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
 
+% Eval rules for sum types
+eval(case(T, XLeft, TLeft, XRight, TRight),
+     case(T1, XLeft, TLeft, XRight, TRight)) :-
+    % Left
+    eval(case(inl(V0), XLeft, TLeft, XRight, TRight), Result1),
+    substitute(XLeft, V0, TLeft, Result1),
+    eval(case(inr(V1), XLeft, TLeft, XRight, TRight), Result2),
+    substitute(XRight, V1, TRight, Result2),
+    eval(T, T1).
+
+eval(inl(Term1, _), inl(Term2, _)) :- eval(Term1, Term2).
+eval(inr(Term1, _), inr(Term2, _)) :- eval(Term1, Term2).
+
 % eval(V, V) :- value(V).
 
 % Substitution
