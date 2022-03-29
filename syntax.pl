@@ -23,21 +23,21 @@ builtinfunction(pred) --> "pred".
 builtinfunction(succ) --> "succ".
 builtinfunction(iszero) --> "iszero".
 
-abstraction(X, T, Body) --> "\\", primary(variable(X)), ":", type(T), ".", term(Body).
+abstraction(X, T, Body) --> "\\", varname(X), ":", type(T), ".", term(Body).
 
 :- table application/4.
-application(T, T1) --> function(T), " ", primary(T1).
+application(T, T1) --> builtinfunction(T), " ", term(T1).
 application(app(T, T1), T2) --> application(T, T1), " ", primary(T2).
+application(T, T1) --> primary(T), " ", term(T1).
 
-function(T) --> builtinfunction(T).
-function(T) --> primary(T).
 
 if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term(Else).
 
-term(app(F, X)) --> application(F, X).
-term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(T) --> primary(T).
+term(lambda(X, T, Body)) --> abstraction(X, T, Body).
+term(app(F, X)) --> application(F, X).
+term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
+
 
 % Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
 
