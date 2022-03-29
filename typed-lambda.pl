@@ -45,6 +45,7 @@ type(boolT).
 type(natT).
 type(funT(T1, T2)) :- type(T1), type(T2).
 type(pairT(T1, T2)) :-  type(T1), type(T2).
+type(sum(T1, T2)) :- type(T1), type(T2).
 
 % Evaluation rules
 
