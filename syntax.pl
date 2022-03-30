@@ -88,8 +88,8 @@ test(identity_function) :- phrase(abstraction([x], natT, variable([x])), "\\x:Na
 test(identity_function2) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.(x)").
 
 test(application_in_abstraction) :- phrase(abstraction([x], natT,
-                                                       app(variable([s, n, d]),
-                                                           variable([x]))),
+                                                       app([variable([s, n, d]),
+                                                            variable([x])])),
                                            "\\x:Nat.snd x").
 
 
@@ -97,25 +97,27 @@ test(reshape_2) :- phrase(reshape(app(f, g)), [f, g]).
 test(reshape_3) :- phrase(reshape(app(app(f, g), h)), [f, g, h]).
 test(reshape_4) :- phrase(reshape(app(app(app(f, g), h), i)), [f, g, h, i]).
 
-test(function_application) :- phrase(term(app(variable([f]), variable([g]))), "f g").
+test(function_application) :- phrase(term(app([variable([f]), variable([g])])), "f g").
 test(function_application_left_assoc) :-
-    parseterm(T, "f g h"),
-    parseterm(T, "(f g) h").
+    phrase(application(Ls), "(f g) h"),
+    phrase(application(Ls), "f g h").
 
 test(function_application_identity_zero) :-
-    phrase(application(lambda([x], natT, variable([x])), zero),
-           "\\x:Nat.x 0").
+    phrase(application([lambda([x], natT, variable([x])), zero]),
+           "(\\x:Nat.x) 0").
 
 test(term_application_identity_zero) :-
-    phrase(term(app(lambda([x], natT, variable([x])), zero)),
+    phrase(term(app([lambda([x], natT, variable([x])), zero])),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_true) :-
-    phrase(term(app(lambda([x], natT, variable([x])), true)),
+    phrase(term(app([lambda([x], natT, variable([x])), true])),
            "(\\x:Nat.x) true").
 
-% test(term_application_id_one) :-
-%     phrase(term(T),
-%            "(\\x:Nat.snd x) 1").
+test(term_application_id_one) :-
+    phrase(term(app(lambda([x],natT,app([variable([s,n,d]),
+                                         variable([x])])),
+                    int(1))),
+           "(\\x:Nat.snd x) 1").
 
 :- end_tests(parser).
