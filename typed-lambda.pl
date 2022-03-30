@@ -121,8 +121,18 @@ substitute(X, V, app(T, T1), app(T21, T22)) :- substitute(X, V, T, T21),
                                                substitute(X, V, T1, T22).
 
 substitute(_, _, T, T) :- integer(T).
-substitute(X, V, Var, V) :- variable(Var), X = Var.
-% substitute(_, _, Var, Var) :- variable(Var).
+
+substitute(X, V, X, V) :- variable(X).
+% If the replaced variable is not v1, we leave it as is.
+substitute(X, _, V1, V1) :- X \== V1.
+
+:- begin_tests(substitute).
+% Mortal Kombat woo
+test(sub0) :- substitute(y, 0, x, x).
+
+test(sub1) :- substitute(y, 0, y, 0).
+:- end_tests(substitute).
+
 
 free_vars(true, []).
 free_vars(false, []).
