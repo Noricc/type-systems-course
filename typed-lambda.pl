@@ -90,6 +90,18 @@ eval(inr(Term1, _), inr(Term2, _)) :- eval(Term1, Term2).
 
 % eval(V, V) :- value(V).
 
+:- begin_tests(evaluator).
+test(eval0) :- eval(app(lambda(x,natT,x), 0), 0).
+test(eval1) :- eval(app(lambda(x,natT,iszero(0)), 0),
+                    iszero(0)).
+test(eval2) :- eval(app(lambda(y,natT,
+                               app(lambda(x,natT,iszero(x)), y)),
+                        0),
+                    app(lambda(x,natT,iszero(x)),
+                        0)).
+
+:- end_tests(evaluator).
+
 % Substitution
 substitute(_, _, true, true).
 substitute(_, _, false, false).
