@@ -207,8 +207,15 @@ typing(Ctxt, snd(T), T1) :- typing(Ctxt, T, pairT(_, T1)).
 typing(Ctxt, X, T) :- member([X, T], Ctxt), variable(X), type(T).
 
 :- begin_tests(typing).
-test(type_fst) :- typing([], fst(pair(false, x)), boolT).
+test(type_fst) :- typing([[x, natT]], fst(pair(false, x)), boolT).
 test(type_snt) :- typing([[x, natT]], snd(pair(false, x)), natT).
+test(type_fun) :- typing([],lambda(x,natT,iszero(x)),funT(natT,boolT)).
+test(type_fun2, [fail]) :-
+    typing([],
+           app(lambda(x,natT,snd(x)), 1),
+           _).
+
+test(type_fun3, [fail]) :- typing([], app(lambda(x,natT,x), true), _).
 
 :- end_tests(typing).
 
