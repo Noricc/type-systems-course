@@ -21,11 +21,29 @@ term(inr(Term, Type)) :- term(Term), type(Type).
 term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) :- term(Term),
                                                         variable(LeftX), term(LeftTerm),
                                                         variable(RightX), term(RightTerm).
-
 term(X) :- integer(X).
 term(X) :- variable(X).
 
-variable(X) :- string(X).
+variable(X) :- atom(X).
+
+% TYPES
+type(boolT).
+type(natT).
+type(funT(T1, T2)) :- type(T1), type(T2).
+type(pairT(T1, T2)) :-  type(T1), type(T2).
+type(sum(T1, T2)) :- type(T1), type(T2).
+
+:- begin_tests(term).
+test(term1) :- term(app(lambda(x,natT,iszero(x)), 0)).
+test(term2) :- term(lambda(x,funT(natT,boolT),
+                           lambda(y,natT,app(x, y)))).
+
+% (\x : Nat->Bool. (\y: Nat.(x y))) (\x : Nat.(iszero x)) 0
+test(term3) :- term(app(app(lambda(x,funT(natT,boolT),
+                                   lambda(y,natT, app(x, y))),
+                            lambda(x,natT,iszero(x))),0)).
+:- end_tests(term).
+
 
 desugar(let(X, Type, Term1, Term2),
         app(lambda(X, Type, Term2), Term1)).
@@ -40,12 +58,6 @@ value(X) :- numeric_value(X).
 numeric_value(0).
 numeric_value(succ(X)) :- numeric_value(X).
 
-% TYPES
-type(boolT).
-type(natT).
-type(funT(T1, T2)) :- type(T1), type(T2).
-type(pairT(T1, T2)) :-  type(T1), type(T2).
-type(sum(T1, T2)) :- type(T1), type(T2).
 
 % Evaluation rules
 
