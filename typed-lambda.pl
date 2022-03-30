@@ -163,6 +163,12 @@ free_vars(app(T1, T2), FreeVars) :- free_vars(T1, FV1),
                                     free_vars(T2, FV2),
                                     union(FV1, FV2, FreeVars).
 
+:- begin_tests(free_vars).
+test(free_vars0) :-
+    free_vars(lambda(x, natT, app(x, y)), [y]).
+
+:- end_tests(free_vars).
+
 
 bigstep(T, V) :- eval(T, V), value(V).
 bigstep(T, V) :- eval(T, T1), bigstep(T1, V).
