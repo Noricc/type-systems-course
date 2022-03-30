@@ -16,6 +16,8 @@ varname([C|Cs]) --> char(C), varname(Cs).
 primary(true) --> "true".
 primary(false) --> "false".
 primary(zero) --> "0".
+primary(int(XNum)) --> [X], {atom_number(X, XNum),
+                             integer(XNum)}.
 primary(variable(V)) --> varname(V).
 primary(T) --> "(", term(T), ")".
 
@@ -25,22 +27,33 @@ builtinfunction(iszero) --> "iszero".
 
 abstraction(X, T, Body) --> "\\", varname(X), ":", type(T), ".", term(Body).
 
-:- table application/4.
-application(T, T1) --> builtinfunction(T), " ", term(T1).
-application(app(T, T1), T2) --> application(T, T1), " ", primary(T2).
-application(T, T1) --> primary(T), " ", term(T1).
+% Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
+% We try to use tabling to fix the left-recursion
+% :- table application/4.
+application([F, X|Xs]) --> primary(F), " ", primary(X), arguments(Xs).
 
+arguments([]) --> [].
+arguments([T|Ts]) --> " ", primary(T), arguments(Ts).
+
+% This rule is left-recursive but apparently that's ok?!?!
+reshape([]) --> [].
+reshape(X) --> [X].
+reshape(app(F, X)) --> [F, X].
+reshape(app(Term, X)) --> reshape(Term), [X].
 
 if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term(Else).
 
-term(T) --> primary(T).
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(app(F, X)) --> application(F, X).
+term(app(Args)) --> application(Args).
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
+term(T) --> primary(T).
 
 
-% Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
-
+parseterm(app(T1, T2), String) :- phrase(term(app(Args)),
+                                         String),
+                                  phrase(reshape(app(T1, T2)),
+                                         Args).
+parseterm(Term, String) :- phrase(term(Term), String).
 
 % VALUES
 value(true) --> "true".
@@ -55,3 +68,54 @@ type(boolT) --> "Bool".
 type(natT) --> "Nat".
 type(T) --> "(", type(T), ")".
 type(funT(T1, T2)) --> type(T1), "->", type(T2).
+
+:- begin_tests(parser).
+:- set_prolog_flag(double_quotes, chars).
+test(varname_x) :- phrase(varname([x]), "x").
+test(varname_xyz) :- phrase(varname([x, y, z]), "xyz").
+
+test(primary_true) :- phrase(primary(true), "true").
+test(primary_false) :- phrase(primary(false), "false").
+test(primary_zero) :- phrase(primary(zero), "0").
+test(primary_variable) :- phrase(primary(variable([x])), "x").
+test(primary_int) :- phrase(primary(int(1)), "1").
+
+test(builtin_pred) :- phrase(builtinfunction(pred), "pred").
+test(builtin_succ) :- phrase(builtinfunction(succ), "succ").
+test(builtin_iszero) :- phrase(builtinfunction(iszero), "iszero").
+
+test(identity_function) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.x").
+test(identity_function2) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.(x)").
+
+test(application_in_abstraction) :- phrase(abstraction([x], natT,
+                                                       app(variable([s, n, d]),
+                                                           variable([x]))),
+                                           "\\x:Nat.snd x").
+
+
+test(reshape_2) :- phrase(reshape(app(f, g)), [f, g]).
+test(reshape_3) :- phrase(reshape(app(app(f, g), h)), [f, g, h]).
+test(reshape_4) :- phrase(reshape(app(app(app(f, g), h), i)), [f, g, h, i]).
+
+test(function_application) :- phrase(term(app(variable([f]), variable([g]))), "f g").
+test(function_application_left_assoc) :-
+    parseterm(T, "f g h"),
+    parseterm(T, "(f g) h").
+
+test(function_application_identity_zero) :-
+    phrase(application(lambda([x], natT, variable([x])), zero),
+           "\\x:Nat.x 0").
+
+test(term_application_identity_zero) :-
+    phrase(term(app(lambda([x], natT, variable([x])), zero)),
+           "(\\x:Nat.x) 0").
+
+test(term_application_identity_true) :-
+    phrase(term(app(lambda([x], natT, variable([x])), true)),
+           "(\\x:Nat.x) true").
+
+% test(term_application_id_one) :-
+%     phrase(term(T),
+%            "(\\x:Nat.snd x) 1").
+
+:- end_tests(parser).
