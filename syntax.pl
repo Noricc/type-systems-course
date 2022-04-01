@@ -39,13 +39,13 @@ if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term
 
 % Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(app(T, X)) --> application(Args), { phrase(left_assoc(app(T, X)), Args) }.
+term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(T) --> primary(T).
 
 % Left associativity of application
-left_assoc(app(F, X)) --> [F, X].
-left_assoc(app(T, X)) --> left_assoc(T), [X].
+bind(T, X, app(X, T)).
+left_assoc(T, [X|Xs]) :- foldl(bind, Xs, X, T).
 
 % VALUES
 value(true) --> "true".
@@ -85,9 +85,9 @@ test(application_in_abstraction) :- phrase(abstraction([x], natT,
                                            "\\x:Nat.snd x").
 
 
-test(left_assoc_2) :- phrase(left_assoc(app(f, g)), [f, g]).
-test(left_assoc_3) :- phrase(left_assoc(app(app(f, g), h)), [f, g, h]).
-test(left_assoc_4) :- phrase(left_assoc(app(app(app(f, g), h), i)), [f, g, h, i]).
+test(left_assoc_2) :- left_assoc(app(f, g), [f, g]).
+test(left_assoc_3) :- left_assoc(app(app(f, g), h), [f, g, h]).
+test(left_assoc_4) :- left_assoc(app(app(app(f, g), h), i), [f, g, h, i]).
 
 test(function_application) :- phrase(term(app(variable([f]), variable([g]))), "f g").
 test(function_application_left_assoc) :-
