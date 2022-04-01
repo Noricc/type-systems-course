@@ -35,25 +35,17 @@ application([F, X|Xs]) --> primary(F), " ", primary(X), arguments(Xs).
 arguments([]) --> [].
 arguments([T|Ts]) --> " ", primary(T), arguments(Ts).
 
-% This rule is left-recursive but apparently that's ok?!?!
-reshape([]) --> [].
-reshape(X) --> [X].
-reshape(app(F, X)) --> [F, X].
-reshape(app(Term, X)) --> reshape(Term), [X].
-
 if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term(Else).
 
+% Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(app(Args)) --> application(Args).
+term(app(T, X)) --> application(Args), { phrase(left_assoc(app(T, X)), Args) }.
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(T) --> primary(T).
 
-
-parseterm(app(T1, T2), String) :- phrase(term(app(Args)),
-                                         String),
-                                  phrase(reshape(app(T1, T2)),
-                                         Args).
-parseterm(Term, String) :- phrase(term(Term), String).
+% Left associativity of application
+left_assoc(app(F, X)) --> [F, X].
+left_assoc(app(T, X)) --> left_assoc(T), [X].
 
 % VALUES
 value(true) --> "true".
@@ -88,35 +80,35 @@ test(identity_function) :- phrase(abstraction([x], natT, variable([x])), "\\x:Na
 test(identity_function2) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.(x)").
 
 test(application_in_abstraction) :- phrase(abstraction([x], natT,
-                                                       app([variable([s, n, d]),
-                                                            variable([x])])),
+                                                       app(variable([s, n, d]),
+                                                           variable([x]))),
                                            "\\x:Nat.snd x").
 
 
-test(reshape_2) :- phrase(reshape(app(f, g)), [f, g]).
-test(reshape_3) :- phrase(reshape(app(app(f, g), h)), [f, g, h]).
-test(reshape_4) :- phrase(reshape(app(app(app(f, g), h), i)), [f, g, h, i]).
+test(left_assoc_2) :- phrase(left_assoc(app(f, g)), [f, g]).
+test(left_assoc_3) :- phrase(left_assoc(app(app(f, g), h)), [f, g, h]).
+test(left_assoc_4) :- phrase(left_assoc(app(app(app(f, g), h), i)), [f, g, h, i]).
 
-test(function_application) :- phrase(term(app([variable([f]), variable([g])])), "f g").
+test(function_application) :- phrase(term(app(variable([f]), variable([g]))), "f g").
 test(function_application_left_assoc) :-
-    phrase(application(Ls), "(f g) h"),
-    phrase(application(Ls), "f g h").
+    phrase(term(Ls), "(f g) h"),
+    phrase(term(Ls), "f g h").
 
 test(function_application_identity_zero) :-
     phrase(application([lambda([x], natT, variable([x])), zero]),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_zero) :-
-    phrase(term(app([lambda([x], natT, variable([x])), zero])),
+    phrase(term(app(lambda([x], natT, variable([x])), zero)),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_true) :-
-    phrase(term(app([lambda([x], natT, variable([x])), true])),
+    phrase(term(app(lambda([x], natT, variable([x])), true)),
            "(\\x:Nat.x) true").
 
 test(term_application_id_one) :-
-    phrase(term(app(lambda([x],natT,app([variable([s,n,d]),
-                                         variable([x])])),
+    phrase(term(app(lambda([x],natT,app(variable([s,n,d]),
+                                        variable([x]))),
                     int(1))),
            "(\\x:Nat.snd x) 1").
 
