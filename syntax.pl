@@ -30,7 +30,10 @@ abstraction(X, T, Body) --> "\\", varname(X), ":", type(T), ".", term(Body).
 % Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
 % We try to use tabling to fix the left-recursion
 % :- table application/4.
-application([F, X|Xs]) --> primary(F), " ", primary(X), arguments(Xs).
+application([F, X|Xs]) --> fun(F), " ", primary(X), arguments(Xs).
+
+fun(F) --> builtinfunction(F), !. % We cut so we don't try to match "pred" with a variable.
+fun(F) --> primary(F).
 
 arguments([]) --> [].
 arguments([T|Ts]) --> " ", primary(T), arguments(Ts).
