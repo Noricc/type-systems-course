@@ -79,7 +79,7 @@ eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
 
-eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
+eval(app(lambda(variable(X), _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
 eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
 eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
 
@@ -185,25 +185,28 @@ test(free_vars0) :-
 
 :- end_tests(free_vars).
 
-
-bigstep(T, V) :- eval(T, V), value(V).
-bigstep(T, V) :- eval(T, T1), bigstep(T1, V).
+% Doesn't work now
+% printterm(T) :- phrase(term(T), Message), writeln(Message).
 
 
 % TYPES
+% Build-in functions
 typing(_, true, boolT).
 typing(_, false, boolT).
-typing(_, 0, natT).
-typing(Ctxt, pred(T), natT) :- typing(Ctxt, T, natT).
-typing(Ctxt, succ(T), natT) :- typing(Ctxt, T, natT).
-typing(Ctxt, iszero(T), boolT) :- typing(Ctxt, T, natT).
+typing(_, zero, natT).
+typing(_, pred, funT(natT, natT)).
+typing(_, succ, funT(natT, natT)).
+typing(_, iszero, funT(natT, boolT)).
+typing(_, fst, funT(pairT(T1, _),T1)).
+typing(_, snd, funT(pairT(_, T2), T2)).
+
 typing(Ctxt, if(T1, T2, T3), T) :- typing(Ctxt, T1, boolT),
                                    typing(Ctxt, T2, T),
                                    typing(Ctxt, T3, T).
 
 
 % Functions
-typing(Ctxt, lambda(X, Type, Term),
+typing(Ctxt, lambda(variable(X), Type, Term),
        funT(Type, Type2)) :- append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
                              typing(Ctxt1, Term, Type2). % and I can type the body with this new context
 
@@ -215,17 +218,28 @@ typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(Argtype, T12)),
 typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
                                                typing(Ctxt, T2, TT2).
 
-typing(Ctxt, fst(T), T1) :- typing(Ctxt, T, pairT(T1, _)).
 
-typing(Ctxt, snd(T), T1) :- typing(Ctxt, T, pairT(_, T1)).
+
+
 
 % Variables
-typing(Ctxt, X, T) :- member([X, T], Ctxt), variable(X), type(T).
+typing(Ctxt, variable(X), T) :- member([X, T], Ctxt), variable(X), type(T).
 
 :- begin_tests(typing).
-test(type_fst) :- typing([[x, natT]], fst(pair(false, x)), boolT).
-test(type_snt) :- typing([[x, natT]], snd(pair(false, x)), natT).
-test(type_fun) :- typing([],lambda(x,natT,iszero(x)),funT(natT,boolT)).
+:- set_prolog_flag(double_quotes, chars).
+
+test(type_pair) :- phrase(term(T), "{false, x}"),
+                   typing([[x, natT]], T, pairT(boolT, natT)).
+
+test(type_fst) :- phrase(term(T), "fst {false, x}"),
+                  typing([[x, natT]], T, boolT).
+
+test(type_snd) :- phrase(term(T), "snd {false, x}"),
+                  typing([[x, natT]], T, natT).
+
+test(type_fun) :- phrase(term(T), "\\x:Nat.iszero x"),
+                  typing([],T, funT(natT,boolT)).
+
 test(type_fun2, [fail]) :-
     typing([],
            app(lambda(x,natT,snd(x)), 1),
@@ -234,6 +248,12 @@ test(type_fun2, [fail]) :-
 test(type_fun3, [fail]) :- typing([], app(lambda(x,natT,x), true), _).
 
 :- end_tests(typing).
+
+bigstep(T, V) :- eval(T, V), value(V), printterm(T).
+bigstep(T, V) :- eval(T, T1), printterm(T), bigstep(T1, V).
+
+evaluate(T, V) :- typing([], T, _),
+                  bigstep(T, V).
 
 % TESTS
 % eval(app(lambda("x", _, 0), succ(0)), R). R = 0;
