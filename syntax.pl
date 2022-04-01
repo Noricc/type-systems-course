@@ -5,19 +5,30 @@
 
 :- set_prolog_flag(double_quotes, chars).
 
-:- use_module(library(tabling)).
-
+% Basic stuff
 char(C) --> [C], {code_type(C, alpha)}.
 
 varname([C]) --> char(C).
 varname([C|Cs]) --> char(C), varname(Cs).
 
+digit(N) --> [C], { code_type(C, digit), atom_number(C, N) }.
+
+% Copied from S-Overflow
+nat(N)   --> digit(D), nat(D,N).
+nat(N,N) --> [].
+nat(A,N) --> digit(D), { A1 is A*10 + D }, nat(A1,N).
+
+symbol_num(zero, 0).
+symbol_num(succ(S), N) :- integer(N),
+                          N > 0,
+                          N1 is (N - 1),
+                          symbol_num(S, N1).
+
 % TERMS
 primary(true) --> "true".
 primary(false) --> "false".
 primary(zero) --> "0".
-primary(int(XNum)) --> [X], {atom_number(X, XNum),
-                             integer(XNum)}.
+primary(succ(S)) --> nat(N), { symbol_num(succ(S), N) }.
 primary(variable(V)) --> varname(V).
 primary(T) --> "(", term(T), ")".
 
