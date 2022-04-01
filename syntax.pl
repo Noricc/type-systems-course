@@ -64,7 +64,7 @@ left_assoc(T, [X|Xs]) :- foldl(bind, Xs, X, T).
 % VALUES
 value(true) --> "true".
 value(false) --> "false".
-value(Number) --> numbervalue(Number).
+value(number(N)) --> numbervalue(N).
 value(lambda(X, T, Body)) --> "\\", term(variable(X)), ":", type(T), ".", term(Body).
 
 numbervalue(zero) --> "0".
