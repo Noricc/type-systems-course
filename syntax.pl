@@ -34,10 +34,13 @@ primary(zero) --> "0".
 primary(succ(S)) --> nat(N), { symbol_num(succ(S), N) }.
 primary(variable(V)) --> variable(V).
 primary(T) --> "(", term(T), ")".
+primary(pair(T1, T2)) --> pair(T1, T2).
 
 builtinfunction(pred) --> "pred".
 builtinfunction(succ) --> "succ".
 builtinfunction(iszero) --> "iszero".
+builtinfunction(fst) --> "fst".
+builtinfunction(snd) --> "snd".
 
 abstraction(X, T, Body) --> "\\", variable(X), ":", type(T), ".", term(Body).
 
@@ -53,6 +56,8 @@ arguments([]) --> [].
 arguments([T|Ts]) --> " ", primary(T), arguments(Ts).
 
 if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term(Else).
+
+pair(T1, T2) --> "{", term(T1), ", ", term(T2), "}".
 
 % Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
@@ -101,7 +106,7 @@ test(identity_function) :- phrase(abstraction(x, natT, variable(x)), "\\x:Nat.x"
 test(identity_function2) :- phrase(abstraction(x, natT, variable(x)), "\\x:Nat.(x)").
 
 test(application_in_abstraction) :- phrase(abstraction(x, natT,
-                                                       app(variable(snd),
+                                                       app(snd,
                                                            variable(x))),
                                            "\\x:Nat.snd x").
 
@@ -128,8 +133,8 @@ test(term_application_identity_true) :-
            "(\\x:Nat.x) true").
 
 test(term_application_id_one) :-
-    phrase(term(app(lambda(x,natT,app(variable(snd),
-                                        variable(x))),
+    phrase(term(app(lambda(x,natT,app(snd,
+                                      variable(x))),
                     succ(zero))),
            "(\\x:Nat.snd x) 1").
 
@@ -138,5 +143,18 @@ test(complex_term) :-
 
 test(complex_term) :-
     phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y))) (\\x:Nat.(iszero x)) 0").
+
+test(pair) :-
+    phrase(term(pair(zero, false)),
+           "{0, false}").
+test(pair1) :-
+    phrase(term(pair(pair(variable(x), variable(y)), variable(z))),
+           "{{x, y}, z}").
+
+test(pairargs) :-
+    phrase(term(app(fst, pair(variable(x),
+                              variable(y)))),
+           "fst {x, y}").
+
 
 :- end_tests(parser).
