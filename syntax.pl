@@ -58,6 +58,7 @@ term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(T) --> primary(T).
 
+
 % Left associativity of application
 bind(T, X, app(X, T)).
 left_assoc(T, [X|Xs]) :- foldl(bind, Xs, X, T).
@@ -86,7 +87,7 @@ test(primary_true) :- phrase(primary(true), "true").
 test(primary_false) :- phrase(primary(false), "false").
 test(primary_zero) :- phrase(primary(zero), "0").
 test(primary_variable) :- phrase(primary(variable([x])), "x").
-test(primary_int) :- phrase(primary(int(1)), "1").
+test(primary_int) :- phrase(primary(succ(zero)), "1").
 
 test(builtin_pred) :- phrase(builtinfunction(pred), "pred").
 test(builtin_succ) :- phrase(builtinfunction(succ), "succ").
