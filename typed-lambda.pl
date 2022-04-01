@@ -1,5 +1,7 @@
 % The typed lambda calculus. Project 3 of type systems course
 
+:- use_module(syntax).
+
 % SYNTAX
 % It's usually a good idea to order the rules
 % so that the most generally matching are tried last.
@@ -34,16 +36,19 @@ type(pairT(T1, T2)) :-  type(T1), type(T2).
 type(sum(T1, T2)) :- type(T1), type(T2).
 
 :- begin_tests(term).
-test(term1) :- term(app(lambda(x,natT,iszero(x)), 0)).
-test(term2) :- term(lambda(x,funT(natT,boolT),
-                           lambda(y,natT,app(x, y)))).
+:- set_prolog_flag(double_quotes, chars).
+
+test(term1) :- phrase(term(T), "(\\x:Nat.iszero 0)"),
+               term(T).
+
+test(term2) :- phrase(term(T), "\\x:Nat->Bool.(\\y:Nat.x y)"),
+               term(T).
 
 % (\x : Nat->Bool. (\y: Nat.(x y))) (\x : Nat.(iszero x)) 0
 test(term3) :- term(app(app(lambda(x,funT(natT,boolT),
                                    lambda(y,natT, app(x, y))),
                             lambda(x,natT,iszero(x))),0)).
 :- end_tests(term).
-
 
 desugar(let(X, Type, Term1, Term2),
         app(lambda(X, Type, Term2), Term1)).
@@ -55,7 +60,7 @@ value(lambda(_, _, _)).
 value(pair(V1, V2)) :- value(V1), value(V2).
 value(X) :- numeric_value(X).
 
-numeric_value(0).
+numeric_value(zero).
 numeric_value(succ(X)) :- numeric_value(X).
 
 
@@ -64,8 +69,8 @@ numeric_value(succ(X)) :- numeric_value(X).
 % Computation rules
 eval(if(true, T1, _), T1).
 eval(if(false, _, T2), T2).
-eval(iszero(0), true).
-eval(iszero(succ(NV)), false) :- numeric_value(NV).
+eval(app(iszero, zero), true).
+eval(app(iszero, succ(_)), false).
 eval(pred(0), 0).
 eval(pred(succ(NV)), NV) :- numeric_value(NV).
 
@@ -74,7 +79,7 @@ eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
 
-eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R).
+eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
 eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
 eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
 
@@ -103,20 +108,26 @@ eval(inr(Term1, _), inr(Term2, _)) :- eval(Term1, Term2).
 % eval(V, V) :- value(V).
 
 :- begin_tests(evaluator).
-test(eval0) :- eval(app(lambda(x,natT,x), 0), 0).
-test(eval1) :- eval(app(lambda(x,natT,iszero(0)), 0),
-                    iszero(0)).
-test(eval2) :- eval(app(lambda(y,natT,
-                               app(lambda(x,natT,iszero(x)), y)),
-                        0),
-                    app(lambda(x,natT,iszero(x)),
-                        0)).
+:- set_prolog_flag(double_quotes, chars).
 
+test(eval0) :- phrase(term(T), "(\\x:Nat.x) 0"),
+               eval(T, zero).
+
+test(eval1) :- phrase(term(T), "(\\x:Nat.iszero 0) 0"),
+               eval(T, app(iszero, zero)).
+
+test(eval2) :- phrase(term(T), "(\\y:Nat.(\\x:Nat.iszero x) y) 0"),
+               phrase(term(T1), "(\\x:Nat.iszero x) 0"),
+               eval(T, T1).
 :- end_tests(evaluator).
 
 % Substitution
 substitute(_, _, true, true).
 substitute(_, _, false, false).
+substitute(_, _, iszero, iszero).
+substitute(_, _, pred, pred).
+substitute(_, _, succ, succ).
+
 substitute(X, V, if(T1, T2, T3), if(T11, T21, T31)) :- substitute(X, V, T1, T11),
                                                        substitute(X, V, T2, T21),
                                                        substitute(X, V, T3, T31).
@@ -132,17 +143,22 @@ substitute(X, V, lambda(Y, Type, T), lambda(Y, Type, T1)) :- free_vars(lambda(Y,
 substitute(X, V, app(T, T1), app(T21, T22)) :- substitute(X, V, T, T21),
                                                substitute(X, V, T1, T22).
 
-substitute(_, _, T, T) :- integer(T).
+substitute(X, V, variable(X), V).
+% Not sure the X =/= Y is needed.
+substitute(_, _, variable(Y), variable(Y)).
 
-substitute(X, V, X, V) :- variable(X).
-% If the replaced variable is not v1, we leave it as is.
-substitute(X, _, V1, V1) :- X \== V1.
+substitute(_, _, T, T) :- value(T).
 
 :- begin_tests(substitute).
 % Mortal Kombat woo
-test(sub0) :- substitute(y, 0, x, x).
+test(sub0) :- substitute(y, zero, variable(x), variable(x)).
 
-test(sub1) :- substitute(y, 0, y, 0).
+test(sub1) :- substitute(y, zero, variable(y), zero).
+
+test(sub2) :- substitute(x, zero, app(iszero, zero),
+                         app(iszero, zero)).
+
+test(sub3) :- substitute(x, zero, zero, zero).
 :- end_tests(substitute).
 
 
