@@ -12,6 +12,8 @@ char(C) --> [C], {code_type(C, alpha)}.
 varname([C]) --> char(C).
 varname([C|Cs]) --> char(C), varname(Cs).
 
+variable(V) --> varname(Cs), { atom_chars(V, Cs) }.
+
 digit(N) --> [C], { code_type(C, digit), atom_number(C, N) }.
 
 % Copied from S-Overflow
@@ -30,14 +32,14 @@ primary(true) --> "true".
 primary(false) --> "false".
 primary(zero) --> "0".
 primary(succ(S)) --> nat(N), { symbol_num(succ(S), N) }.
-primary(variable(V)) --> varname(V).
+primary(variable(V)) --> variable(V).
 primary(T) --> "(", term(T), ")".
 
 builtinfunction(pred) --> "pred".
 builtinfunction(succ) --> "succ".
 builtinfunction(iszero) --> "iszero".
 
-abstraction(X, T, Body) --> "\\", varname(X), ":", type(T), ".", term(Body).
+abstraction(X, T, Body) --> "\\", variable(X), ":", type(T), ".", term(Body).
 
 % Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
 % We try to use tabling to fix the left-recursion
@@ -83,22 +85,24 @@ type(T) --> "(", type(T), ")".
 test(varname_x) :- phrase(varname([x]), "x").
 test(varname_xyz) :- phrase(varname([x, y, z]), "xyz").
 
+test(variable_xyz) :- phrase(variable(xyz), "xyz").
+
 test(primary_true) :- phrase(primary(true), "true").
 test(primary_false) :- phrase(primary(false), "false").
 test(primary_zero) :- phrase(primary(zero), "0").
-test(primary_variable) :- phrase(primary(variable([x])), "x").
+test(primary_variable) :- phrase(primary(variable(x)), "x").
 test(primary_int) :- phrase(primary(succ(zero)), "1").
 
 test(builtin_pred) :- phrase(builtinfunction(pred), "pred").
 test(builtin_succ) :- phrase(builtinfunction(succ), "succ").
 test(builtin_iszero) :- phrase(builtinfunction(iszero), "iszero").
 
-test(identity_function) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.x").
-test(identity_function2) :- phrase(abstraction([x], natT, variable([x])), "\\x:Nat.(x)").
+test(identity_function) :- phrase(abstraction(x, natT, variable(x)), "\\x:Nat.x").
+test(identity_function2) :- phrase(abstraction(x, natT, variable(x)), "\\x:Nat.(x)").
 
-test(application_in_abstraction) :- phrase(abstraction([x], natT,
-                                                       app(variable([s, n, d]),
-                                                           variable([x]))),
+test(application_in_abstraction) :- phrase(abstraction(x, natT,
+                                                       app(variable(snd),
+                                                           variable(x))),
                                            "\\x:Nat.snd x").
 
 
@@ -106,31 +110,31 @@ test(left_assoc_2) :- left_assoc(app(f, g), [f, g]).
 test(left_assoc_3) :- left_assoc(app(app(f, g), h), [f, g, h]).
 test(left_assoc_4) :- left_assoc(app(app(app(f, g), h), i), [f, g, h, i]).
 
-test(function_application) :- phrase(term(app(variable([f]), variable([g]))), "f g").
+test(function_application) :- phrase(term(app(variable(f), variable(g))), "f g").
 test(function_application_left_assoc) :-
     phrase(term(Ls), "(f g) h"),
     phrase(term(Ls), "f g h").
 
 test(function_application_identity_zero) :-
-    phrase(application([lambda([x], natT, variable([x])), zero]),
+    phrase(application([lambda(x, natT, variable(x)), zero]),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_zero) :-
-    phrase(term(app(lambda([x], natT, variable([x])), zero)),
+    phrase(term(app(lambda(x, natT, variable(x)), zero)),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_true) :-
-    phrase(term(app(lambda([x], natT, variable([x])), true)),
+    phrase(term(app(lambda(x, natT, variable(x)), true)),
            "(\\x:Nat.x) true").
 
 test(term_application_id_one) :-
-    phrase(term(app(lambda([x],natT,app(variable([s,n,d]),
-                                        variable([x]))),
+    phrase(term(app(lambda(x,natT,app(variable(snd),
+                                        variable(x))),
                     succ(zero))),
            "(\\x:Nat.snd x) 1").
 
 test(complex_term) :-
-    phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y)))").
+    phrase(term(lambda(x,funT(_,_), _)), "(\\x:Nat->Bool.(\\y:Nat.(x y)))").
 
 test(complex_term) :-
     phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y))) (\\x:Nat.(iszero x)) 0").
