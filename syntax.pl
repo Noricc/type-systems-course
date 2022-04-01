@@ -2,6 +2,7 @@
 % Where we try out prolog DCG parsing
 
 % To allow using string notation....
+:- use_module(library(tabling)).
 
 :- set_prolog_flag(double_quotes, chars).
 
@@ -70,10 +71,11 @@ value(lambda(X, T, Body)) --> "\\", term(variable(X)), ":", type(T), ".", term(B
 numbervalue(zero) --> "0".
 numbervalue(succ(N)) --> "succ", "(", numbervalue(N), ")".
 
+:- table type/3.
 type(boolT) --> "Bool".
 type(natT) --> "Nat".
-type(T) --> "(", type(T), ")".
 type(funT(T1, T2)) --> type(T1), "->", type(T2).
+type(T) --> "(", type(T), ")".
 
 :- begin_tests(parser).
 :- set_prolog_flag(double_quotes, chars).
@@ -123,7 +125,13 @@ test(term_application_identity_true) :-
 test(term_application_id_one) :-
     phrase(term(app(lambda([x],natT,app(variable([s,n,d]),
                                         variable([x]))),
-                    int(1))),
+                    succ(zero))),
            "(\\x:Nat.snd x) 1").
+
+test(complex_term) :-
+    phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y)))").
+
+test(complex_term) :-
+    phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y))) (\\x:Nat.(iszero x)) 0").
 
 :- end_tests(parser).
