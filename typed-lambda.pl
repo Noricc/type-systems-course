@@ -206,8 +206,8 @@ test(type_fun3, [fail]) :- typing([], app(lambda(x,natT,x), true), _).
 
 :- end_tests(typing).
 
-bigstep(T, V) :- eval(T, V), value(V), printterm(T).
-bigstep(T, V) :- eval(T, T1), printterm(T), bigstep(T1, V).
+bigstep(T, V) :- eval(T, V), value(V), writeln(T).
+bigstep(T, V) :- eval(T, T1), writeln(T), bigstep(T1, V).
 
 evaluate(T, V) :- typing([], T, _),
                   bigstep(T, V).
