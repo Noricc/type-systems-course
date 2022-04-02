@@ -68,8 +68,13 @@ pair(T1, T2) --> "{", term(T1), ", ", term(T2), "}".
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
 term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
+term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> "case", " ", term(Term), " ", "of", " ",
+                                                         case_left(LeftX, LeftTerm), " ",
+                                                         case_right(RightX, RightTerm).
 term(T) --> primary(T).
 
+case_left(X, Term) --> "inl", " ", variable(X),  " => ", term(Term).
+case_right(X, Term) --> "inr", " ", variable(X), " => ", term(Term).
 
 % Left associativity of application
 bind(T, X, app(X, T)).
@@ -157,6 +162,12 @@ test(pairargs) :-
     phrase(term(app(fst, pair(variable(x),
                               variable(y)))),
            "fst {x, y}").
+
+test(case) :-
+    phrase(term(case(variable(x),
+                     variable(x), succ(zero),
+                     variable(y), zero)),
+           "case x of inl x => 1 inr y => 0").
 
 
 :- end_tests(parser).
