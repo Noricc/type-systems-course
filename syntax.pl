@@ -95,6 +95,8 @@ numbervalue(succ(N)) --> "succ", "(", numbervalue(N), ")".
 type(boolT) --> "Bool".
 type(natT) --> "Nat".
 type(funT(T1, T2)) --> type(T1), "->", type(T2).
+type(sum(T1, T2)) --> type(T1), " + ", type(T2).
+type(pair(T1, T2)) --> type(T1), " * ", type(T2).
 type(T) --> "(", type(T), ")".
 
 :- begin_tests(parser).
