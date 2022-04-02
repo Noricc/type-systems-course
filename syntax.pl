@@ -71,7 +71,7 @@ term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(inject_left(Term, Type)) --> "inl", " ", term(Term), " as ", type(Type).
 term(inject_right(Term, Type)) --> "inr", " ", term(Term), " as ", type(Type).
 term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> "case", " ", term(Term), " ", "of", " ",
-                                                         case_left(LeftX, LeftTerm), " ",
+                                                         case_left(LeftX, LeftTerm), " | ",
                                                          case_right(RightX, RightTerm).
 term(T) --> primary(T).
 
@@ -169,7 +169,7 @@ test(case) :-
     phrase(term(case(variable(x),
                      variable(x), succ(zero),
                      variable(y), zero)),
-           "case x of inl x => 1 inr y => 0").
+           "case x of inl x => 1 | inr y => 0").
 
 test(inject_left) :-
     phrase(term(inject_left(variable(x), natT)),
