@@ -95,8 +95,8 @@ numbervalue(succ(N)) --> "succ", "(", numbervalue(N), ")".
 type(boolT) --> "Bool".
 type(natT) --> "Nat".
 type(funT(T1, T2)) --> type(T1), "->", type(T2).
-type(sum(T1, T2)) --> type(T1), " + ", type(T2).
-type(pair(T1, T2)) --> type(T1), " * ", type(T2).
+type(sumT(T1, T2)) --> type(T1), " + ", type(T2).
+type(pairT(T1, T2)) --> type(T1), " * ", type(T2).
 type(T) --> "(", type(T), ")".
 
 :- begin_tests(parser).
@@ -174,11 +174,11 @@ test(case) :-
            "case x of inl x => 1 | inr y => 0").
 
 test(inject_left) :-
-    phrase(term(inject_left(variable(x), natT)),
-           "inl x as Nat").
+    phrase(term(inject_left(variable(x), sumT(natT,boolT))),
+           "inl x as Nat + Bool").
 
 test(inject_right) :-
-    phrase(term(inject_right(variable(x), boolT)),
-           "inr x as Bool").
+    phrase(term(inject_right(variable(x), sumT(boolT, natT))),
+           "inr x as Bool + Nat").
 
 :- end_tests(parser).

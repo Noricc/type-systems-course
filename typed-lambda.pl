@@ -151,6 +151,7 @@ test(free_vars1) :-
 typing(_, true, boolT).
 typing(_, false, boolT).
 typing(_, zero, natT).
+typing(_, succ(T), natT) :- typing(_, T, natT).
 typing(_, pred, funT(natT, natT)).
 typing(_, succ, funT(natT, natT)).
 typing(_, iszero, funT(natT, boolT)).
@@ -176,6 +177,11 @@ typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
                                                typing(Ctxt, T2, TT2).
 
 
+typing(Ctxt, inject_left(Term, sumT(T1, T2)), sumT(T1, T2)) :-
+    typing(Ctxt, Term, T1).
+typing(Ctxt, inject_right(Term, sumT(T1, T2)), sumT(T1, T2)) :-
+    typing(Ctxt, Term, T2).
+
 
 
 
@@ -196,6 +202,12 @@ test(type_snd) :- phrase(term(T), "snd {false, x}"),
 
 test(type_fun) :- phrase(term(T), "\\x:Nat.iszero x"),
                   typing([],T, funT(natT,boolT)).
+
+test(type_injection_left) :- phrase(term(T), "inl 12 as Nat + Bool"),
+                             typing([], T, sumT(natT, boolT)).
+
+test(type_injection_right) :- phrase(term(T), "inr true as Nat + Bool"),
+                              typing([], T, sumT(natT, boolT)).
 
 test(type_fun2, [fail]) :-
     typing([],
