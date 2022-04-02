@@ -2,54 +2,6 @@
 
 :- use_module(syntax).
 
-% SYNTAX
-% It's usually a good idea to order the rules
-% so that the most generally matching are tried last.
-term(true). % term(true) doesn't finish immediately because other rules can match
-term(false).
-term(if(T1, T2, T3)) :- term(T1), term(T2), term(T3).
-term(pred(T)) :- term(T).
-term(succ(T)) :- term(T).
-term(iszero(T)) :- term(T).
-term(lambda(X, T, Term)) :- variable(X), type(T), term(Term).
-term(app(T1, T2)) :- term(T1), term(T2).
-term(pair(T1, T2)) :- term(T1), term(T2).
-term(fst(T)) :- term(T).
-term(snd(T)) :- term(T).
-% "inject left" and "inject right"
-% I don't understand what "inject" means here.
-term(inl(Term, Type)) :- term(Term), type(Type).
-term(inr(Term, Type)) :- term(Term), type(Type).
-term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) :- term(Term),
-                                                        variable(LeftX), term(LeftTerm),
-                                                        variable(RightX), term(RightTerm).
-term(X) :- integer(X).
-term(X) :- variable(X).
-
-variable(X) :- atom(X).
-
-% TYPES
-type(boolT).
-type(natT).
-type(funT(T1, T2)) :- type(T1), type(T2).
-type(pairT(T1, T2)) :-  type(T1), type(T2).
-type(sum(T1, T2)) :- type(T1), type(T2).
-
-:- begin_tests(term).
-:- set_prolog_flag(double_quotes, chars).
-
-test(term1) :- phrase(term(T), "(\\x:Nat.iszero 0)"),
-               term(T).
-
-test(term2) :- phrase(term(T), "\\x:Nat->Bool.(\\y:Nat.x y)"),
-               term(T).
-
-% (\x : Nat->Bool. (\y: Nat.(x y))) (\x : Nat.(iszero x)) 0
-test(term3) :- term(app(app(lambda(x,funT(natT,boolT),
-                                   lambda(y,natT, app(x, y))),
-                            lambda(x,natT,iszero(x))),0)).
-:- end_tests(term).
-
 desugar(let(X, Type, Term1, Term2),
         app(lambda(X, Type, Term2), Term1)).
 
@@ -164,7 +116,7 @@ test(sub3) :- substitute(x, zero, zero, zero).
 
 free_vars(true, []).
 free_vars(false, []).
-free_vars(X, [X]) :- variable(X).
+free_vars(variable(X), [variable(X)]).
 free_vars(if(T1, T2, T3), FreeVars) :- free_vars(T3, FV3),
                                        free_vars(T2, FV2),
                                        free_vars(T1, FV1),
@@ -181,7 +133,12 @@ free_vars(app(T1, T2), FreeVars) :- free_vars(T1, FV1),
 
 :- begin_tests(free_vars).
 test(free_vars0) :-
-    free_vars(lambda(x, natT, app(x, y)), [y]).
+    free_vars(lambda(variable(x), natT, app(variable(x), variable(y))),
+              [variable(y)]).
+
+test(free_vars1) :-
+    free_vars(lambda(variable(x), natT, variable(x)),
+              []).
 
 :- end_tests(free_vars).
 
@@ -223,7 +180,7 @@ typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
 
 
 % Variables
-typing(Ctxt, variable(X), T) :- member([X, T], Ctxt), variable(X), type(T).
+typing(Ctxt, variable(X), T) :- member([X, T], Ctxt).
 
 :- begin_tests(typing).
 :- set_prolog_flag(double_quotes, chars).
