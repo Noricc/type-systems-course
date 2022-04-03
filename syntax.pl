@@ -37,9 +37,9 @@ symbol_num(succ(S), N) :- integer(N),
                           symbol_num(S, N1).
 
 keyword(let) --> "let".
-% keyword(pred) --> "pred".
-% keyword(succ) --> "succ".
-% keyword(iszero) --> "iszero".
+keyword(pred) --> "pred".
+keyword(succ) --> "succ".
+keyword(iszero) --> "iszero".
 keyword(if) --> "if".
 keyword(then) --> "then".
 keyword(else) --> "else".
@@ -107,6 +107,9 @@ primary(pair(T1, T2)) --> pair(T1, T2).
 primary(T) --> [lparen], term(T), [rparen].
 
 % Terms
+term(iszero(T)) --> [iszero], term(T).
+term(pred(T)) --> [pred], term(T).
+term(succ(T)) --> [succ], term(T).
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
 term(fix(Term)) --> [fix], term(Term).
 term(inject_left(Term, Type)) --> [inl], term(Term), [as], type(Type).
