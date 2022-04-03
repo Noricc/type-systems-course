@@ -66,6 +66,7 @@ pair(T1, T2) --> "{", term(T1), ", ", term(T2), "}".
 
 % Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
+term(fix(Term)) --> "fix", " ", term(Term).
 term(inject_left(Term, Type)) --> "inl", " ", term(Term), " as ", type(Type).
 term(inject_right(Term, Type)) --> "inr", " ", term(Term), " as ", type(Type).
 term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
@@ -197,5 +198,9 @@ test(let) :-
                            app(iszero, variable(x))),
                    succ(succ(succ(zero))))),
            "let x:Nat = 3 in iszero x").
+
+test(fix) :-
+    phrase(term(fix(app(variable(f), variable(g)))),
+           "fix (f g)").
 
 :- end_tests(parser).
