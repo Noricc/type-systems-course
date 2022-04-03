@@ -42,17 +42,27 @@ eval(pair(T1, T2), pair(T11, T2)) :- eval(T1, T11).
 eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
 
 % Eval rules for sum types
-eval(case(T, XLeft, TLeft, XRight, TRight),
-     case(T1, XLeft, TLeft, XRight, TRight)) :-
-    % Left
-    eval(case(inl(V0), XLeft, TLeft, XRight, TRight), Result1),
-    substitute(XLeft, V0, TLeft, Result1),
-    eval(case(inr(V1), XLeft, TLeft, XRight, TRight), Result2),
-    substitute(XRight, V1, TRight, Result2),
+eval(case(inject_left(V0, _),
+          variable(XLeft), TLeft,
+          variable(_), _), Result) :-
+    substitute(XLeft, V0, TLeft, Result).
+
+eval(case(inject_right(V0, _),
+          variable(_), _,
+          variable(XRight), TRight), Result) :-
+  substitute(XRight, V0, TRight, Result).
+
+eval(case(T,
+          variable(XLeft), TLeft,
+          variable(XRight), TRight),
+     case(T1,
+          variable(XLeft), TLeft,
+          variable(XRight), TRight)) :-
     eval(T, T1).
 
-eval(inl(Term1, _), inl(Term2, _)) :- eval(Term1, Term2).
-eval(inr(Term1, _), inr(Term2, _)) :- eval(Term1, Term2).
+
+eval(inject_left(Term1, _), inject_left(Term2, _)) :- eval(Term1, Term2).
+eval(inject_right(Term1, _), inject_right(Term2, _)) :- eval(Term1, Term2).
 
 % eval(V, V) :- value(V).
 
@@ -68,6 +78,14 @@ test(eval1) :- phrase(term(T), "(\\x:Nat.iszero 0) 0"),
 test(eval2) :- phrase(term(T), "(\\y:Nat.(\\x:Nat.iszero x) y) 0"),
                phrase(term(T1), "(\\x:Nat.iszero x) 0"),
                eval(T, T1).
+
+test(eval_case_1) :- phrase(term(T), "case inl 3 as Nat of inl x => x | inr y => y"),
+                     phrase(term(Response), "3"),
+                     eval(T, Response).
+
+test(eval_case_2) :- phrase(term(T), "case inr 3 as Nat of inl x => x | inr y => y"),
+                     phrase(term(Response), "3"),
+                     eval(T, Response).
 :- end_tests(evaluator).
 
 % Substitution
@@ -94,7 +112,7 @@ substitute(X, V, app(T, T1), app(T21, T22)) :- substitute(X, V, T, T21),
 
 substitute(X, V, variable(X), V).
 % Not sure the X =/= Y is needed.
-substitute(_, _, variable(Y), variable(Y)).
+substitute(X, _, variable(Y), variable(Y)) :- X \= Y.
 
 substitute(_, _, T, T) :- value(T).
 
