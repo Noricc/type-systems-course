@@ -73,6 +73,7 @@ term(inject_right(Term, Type)) --> "inr", " ", term(Term), " as ", type(Type).
 term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> "case", " ", term(Term), " ", "of", " ",
                                                          case_left(LeftX, LeftTerm), " | ",
                                                          case_right(RightX, RightTerm).
+term(app(lambda(X, T, T2), T1)) --> "let", " ", variable(X), ":", type(T), " = ", term(T1), " in ", term(T2).
 term(T) --> primary(T).
 
 case_left(X, Term) --> "inl", " ", variable(X),  " => ", term(Term).
@@ -180,5 +181,12 @@ test(inject_left) :-
 test(inject_right) :-
     phrase(term(inject_right(variable(x), sumT(boolT, natT))),
            "inr x as Bool + Nat").
+
+test(let) :-
+    phrase(term(app(lambda(variable(x),
+                           natT,
+                           app(iszero, variable(x))),
+                   succ(succ(succ(zero))))),
+           "let x:Nat = 3 in iszero x").
 
 :- end_tests(parser).
