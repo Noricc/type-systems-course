@@ -9,15 +9,10 @@
 % Basic stuff
 char(C) --> [C], {code_type(C, alpha)}.
 
-varname([C]) --> char(C).
 varname([C|Cs]) --> char(C), varname(Cs).
+varname([C]) --> char(C).
 
-variable(pred) --> "pred".
-variable(succ) --> "succ".
-variable(iszero) --> "iszero".
-variable(fst) --> "fst".
-variable(snd) --> "snd".
-variable(variable(V)) --> varname(Cs), { atom_chars(V, Cs) }.
+variable(V) --> varname(Cs), { atom_chars(V, Cs) }.
 
 digit(0) --> "0".
 digit(1) --> "1".
@@ -41,44 +36,102 @@ symbol_num(succ(S), N) :- integer(N),
                           N1 is (N - 1),
                           symbol_num(S, N1).
 
+keyword(let) --> "let".
+% keyword(pred) --> "pred".
+% keyword(succ) --> "succ".
+% keyword(iszero) --> "iszero".
+keyword(if) --> "if".
+keyword(then) --> "then".
+keyword(else) --> "else".
+keyword(true) --> "true".
+keyword(false) --> "false".
+keyword(case) --> "case".
+keyword(as) --> "as".
+keyword(inl) --> "inl".
+keyword(inr) --> "inr".
+keyword(fix) --> "fix".
+keyword(of) --> "of".
+keyword(in) --> "in".
+
+sign(lparen) --> "(".
+sign(rparen) --> ")".
+sign(lcurly) --> "{".
+sign(rcurly) --> "}".
+sign(lambda) --> "\\".
+sign(:) --> ":".
+sign(pipe) --> "|".
+sign(=) --> "=".
+sign(.) --> ".".
+sign(,) --> ",".
+sign('=>') --> "=>".
+sign('->') --> "->".
+sign(+) --> "+".
+sign(*) --> "*".
+
+symbol(S) --> keyword(S).
+symbol(S) --> sign(S).
+symbol(number(N)) --> nat(N).
+symbol(variable(V)) --> variable(V).
+
+whitespace() --> " ", whitespace().
+whitespace() --> " ".
+whitespace() --> [].
+
+lexer([]) --> [].
+lexer([S]) --> symbol(S).
+lexer([S|Ss]) --> symbol(S), whitespace(), lexer(Ss).
+
+:- begin_tests(lexer).
+:- set_prolog_flag(double_quotes, chars).
+
+test(number) :- phrase(lexer([number(123)]),
+                       "123").
+
+test(variable) :- phrase(lexer([variable(xyz)]),
+                         "xyz").
+
+test(keyword) :- phrase(lexer([true, false, true]),
+                        "true false true").
+
+test(lambda) :- phrase(sign(lambda), "\\").
+:- end_tests(lexer).
+
 % TERMS
-primary(true) --> "true".
-primary(false) --> "false".
-primary(zero) --> "0".
-primary(succ(S)) --> nat(N), { symbol_num(succ(S), N) }.
-primary(V) --> variable(V).
-primary(T) --> "(", term(T), ")".
+% We express them with tokens
+primary(true) --> [true].
+primary(false) --> [false].
+primary(zero) --> [number(0)].
+primary(succ(S)) --> [number(N)], { symbol_num(succ(S), N) }.
+primary(variable(V)) --> [variable(V)].
 primary(pair(T1, T2)) --> pair(T1, T2).
-
-abstraction(X, T, Body) --> "\\", variable(X), ":", type(T), ".", term(Body).
-
-% Left recursive: see https://github.com/Anniepoo/swipldcgtut/blob/master/dcgcourse.adoc#1-definite-clause-grammars
-% We try to use tabling to fix the left-recursion
-% :- table application/4.
-application([F, X|Xs]) --> primary(F), " ", primary(X), arguments(Xs).
-
-arguments([]) --> [].
-arguments([T|Ts]) --> " ", primary(T), arguments(Ts).
-
-if(Cond, Then, Else) --> "if ", term(Cond), " then ", term(Then), " else ", term(Else).
-
-pair(T1, T2) --> "{", term(T1), ", ", term(T2), "}".
+primary(T) --> [lparen], term(T), [rparen].
 
 % Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(fix(Term)) --> "fix", " ", term(Term).
-term(inject_left(Term, Type)) --> "inl", " ", term(Term), " as ", type(Type).
-term(inject_right(Term, Type)) --> "inr", " ", term(Term), " as ", type(Type).
-term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
+term(fix(Term)) --> [fix], term(Term).
+term(inject_left(Term, Type)) --> [inl], term(Term), [as], type(Type).
+term(inject_right(Term, Type)) --> [inr], term(Term), [as], type(Type).
 term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
-term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> "case", " ", term(Term), " ", "of", " ",
-                                                         case_left(LeftX, LeftTerm), " | ",
+term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> [case], term(Term), [of],
+                                                         case_left(LeftX, LeftTerm), [pipe],
                                                          case_right(RightX, RightTerm).
-term(app(lambda(X, T, T2), T1)) --> "let", " ", variable(X), ":", type(T), " = ", term(T1), " in ", term(T2).
+term(app(lambda(X, T, T2), T1)) --> [let], [variable(X)], [:], type(T), [=], term(T1), [in], term(T2).
+term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(T) --> primary(T).
 
-case_left(X, Term) --> "inl", " ", variable(X),  " => ", term(Term).
-case_right(X, Term) --> "inr", " ", variable(X), " => ", term(Term).
+abstraction(X, T, Body) --> [lambda], [variable(X)], [:], type(T), [.], term(Body).
+
+application([F, X|Xs]) --> primary(F), primary(X), arguments(Xs).
+
+arguments([]) --> [].
+arguments([T|Ts]) --> primary(T), arguments(Ts).
+
+if(Cond, Then, Else) --> [if], primary(Cond), [then], term(Then), [else], term(Else).
+
+pair(T1, T2) --> [lcurly], term(T1), [,], term(T2), [rcurly].
+
+case_left(X, Term) -->  [inl], [variable(X)], ['=>'], term(Term).
+case_right(X, Term) --> [inr], [variable(X)], ['=>'], term(Term).
 
 % Left associativity of application
 bind(T, X, app(X, T)).
@@ -94,33 +147,36 @@ numbervalue(zero) --> "0".
 numbervalue(succ(N)) --> "succ", "(", numbervalue(N), ")".
 
 :- table type/3.
-type(boolT) --> "Bool".
-type(natT) --> "Nat".
-type(funT(T1, T2)) --> type(T1), "->", type(T2).
-type(sumT(T1, T2)) --> type(T1), " + ", type(T2).
-type(pairT(T1, T2)) --> type(T1), " * ", type(T2).
-type(T) --> "(", type(T), ")".
+type(boolT) --> [variable('Bool')].
+type(natT) --> [variable('Nat')].
+type(funT(T1, T2)) --> type(T1), ['->'], type(T2).
+type(sumT(T1, T2)) --> type(T1), [+], type(T2).
+type(pairT(T1, T2)) --> type(T1), [*], type(T2).
+type(T) --> [lparen], type(T), [rparen].
+
+parse(Ast, String) :- phrase(lexer(Symbols), String),
+                      phrase(term(Ast), Symbols).
 
 :- begin_tests(parser).
 :- set_prolog_flag(double_quotes, chars).
 test(varname_x) :- phrase(varname([x]), "x").
 test(varname_xyz) :- phrase(varname([x, y, z]), "xyz").
 
-test(variable_xyz) :- phrase(variable(variable(xyz)), "xyz").
+test(variable_xyz) :- phrase(variable(xyz), "xyz").
 
-test(primary_true) :- phrase(primary(true), "true").
-test(primary_false) :- phrase(primary(false), "false").
-test(primary_zero) :- phrase(primary(zero), "0").
-test(primary_variable) :- phrase(primary(variable(x)), "x").
-test(primary_int) :- phrase(primary(succ(zero)), "1").
+test(primary_true) :- parse(true, "true").
+test(primary_false) :- parse(false, "false").
+test(primary_zero) :- parse(zero, "0").
+test(primary_variable) :- parse(variable(x), "x").
+test(primary_int) :- parse(succ(zero), "1").
 
-test(identity_function) :- phrase(abstraction(variable(x), natT, variable(x)), "\\x:Nat.x").
-test(identity_function2) :- phrase(abstraction(variable(x), natT, variable(x)), "\\x:Nat.(x)").
+test(identity_function) :- parse(lambda(x, natT, variable(x)), "\\ x : Nat . x").
+test(identity_function2) :- parse(lambda(x, natT, variable(x)), "\\ x : Nat . (x)").
 
-test(application_in_abstraction) :- phrase(abstraction(variable(x),
-                                                       natT,
-                                                       app(snd,
-                                                           variable(x))),
+test(application_in_abstraction) :- parse(lambda(x,
+                                                 natT,
+                                                 app(variable(snd),
+                                                     variable(x))),
                                            "\\x:Nat.snd x").
 
 
@@ -128,79 +184,92 @@ test(left_assoc_2) :- left_assoc(app(f, g), [f, g]).
 test(left_assoc_3) :- left_assoc(app(app(f, g), h), [f, g, h]).
 test(left_assoc_4) :- left_assoc(app(app(app(f, g), h), i), [f, g, h, i]).
 
-test(function_application) :- phrase(term(app(variable(f), variable(g))), "f g").
+test(function_application) :- parse(app(variable(f), variable(g)), "f g").
 test(function_application_left_assoc) :-
-    phrase(term(Ls), "(f g) h"),
-    phrase(term(Ls), "f g h").
+    parse(Term, "(f g) h"),
+    parse(Term, "f g h").
 
 test(function_application_identity_zero) :-
-    phrase(application([lambda(variable(x), natT, variable(x)), zero]),
-           "(\\x:Nat.x) 0").
+    phrase(lexer(Text), "(\\x:Nat.x) 0"),
+    phrase(application([lambda(x, natT, variable(x)), zero]), Text).
 
 test(term_application_identity_zero) :-
-    phrase(term(app(lambda(variable(x), natT, variable(x)), zero)),
+    parse(app(lambda(x, natT, variable(x)), zero),
            "(\\x:Nat.x) 0").
 
 test(term_application_identity_true) :-
-    phrase(term(app(lambda(variable(x), natT, variable(x)), true)),
+    parse(app(lambda(x, natT, variable(x)), true),
            "(\\x:Nat.x) true").
 
 test(term_application_id_one) :-
-    phrase(term(app(lambda(variable(x),natT,
-                           app(snd, variable(x))),
-                    succ(zero))),
+    parse(app(lambda(x,natT,
+                     app(variable(snd),
+                         variable(x))),
+              succ(zero)),
            "(\\x:Nat.snd x) 1").
 
 test(complex_term) :-
-    phrase(term(lambda(variable(x),funT(_,_), _)), "(\\x:Nat->Bool.(\\y:Nat.(x y)))").
+    parse(lambda(x, funT(natT,boolT),
+                 lambda(y,natT, app(variable(x), variable(y)))), "(\\x:Nat->Bool.(\\y:Nat.(x y)))").
 
 test(complex_term) :-
-    phrase(term(_), "(\\x:Nat->Bool.(\\y:Nat.(x y))) (\\x:Nat.(iszero x)) 0").
+    parse(_, "(\\x:Nat->Bool.(\\y:Nat.(x y))) (\\x:Nat.(iszero x)) 0").
+
+test(nested_if) :-
+    parse(if(true, false, if(false, true, false)),
+          "if true then false else if false then true else false").
+
+test(nested_if2) :-
+    parse(if(true, if(false, true, false), true),
+          "if true then if false then true else false else true").
 
 test(pair) :-
-    phrase(term(pair(zero, false)),
-           "{0, false}").
+    parse(pair(zero, false),
+          "{0, false}").
+
 test(pair1) :-
-    phrase(term(pair(pair(variable(x), variable(y)), variable(z))),
-           "{{x, y}, z}").
+    parse(pair(pair(variable(x), variable(y)), variable(z)),
+          "{{x, y}, z}").
 
 test(pairargs) :-
-    phrase(term(app(fst, pair(variable(x),
-                              variable(y)))),
-           "fst {x, y}").
+    parse(app(variable(fst), pair(variable(x),
+                                  variable(y))),
+          "fst {x, y}").
 
 test(case) :-
-    phrase(term(case(variable(x),
-                     variable(x), succ(zero),
-                     variable(y), zero)),
-           "case x of inl x => 1 | inr y => 0").
+    parse(case(variable(x),
+               x, succ(zero),
+               y, zero),
+          "case x of inl x => 1 | inr y => 0").
 
 test(inject_left) :-
-    phrase(term(inject_left(variable(x), sumT(natT,boolT))),
-           "inl x as Nat + Bool").
+    parse(inject_left(variable(x), sumT(natT,boolT)),
+          "inl x as Nat + Bool").
 
 test(inject_right) :-
-    phrase(term(inject_right(variable(x), sumT(boolT, natT))),
-           "inr x as Bool + Nat").
+    parse(inject_right(variable(x), sumT(boolT, natT)),
+          "inr x as Bool + Nat").
 
 test(case_inject) :-
-    phrase(term(case(inject_left(zero, natT),
-                     variable(x),
-                     variable(x),
-                     variable(y),
-                     variable(y))),
-           "case inl 0 as Nat of inl x => x | inr y => y").
+    parse(X, "case inl 0 as Nat of inl x => x | inr y => y"),
+    X = case(inject_left(zero, natT),
+             x, variable(x),
+             y, variable(y)).
 
 
 test(let) :-
-    phrase(term(app(lambda(variable(x),
-                           natT,
-                           app(iszero, variable(x))),
-                   succ(succ(succ(zero))))),
-           "let x:Nat = 3 in iszero x").
+    parse(app(lambda(x,
+                     natT,
+                     app(variable(iszero), variable(x))),
+              succ(succ(succ(zero)))),
+          "let x:Nat = 3 in iszero x").
 
 test(fix) :-
-    phrase(term(fix(app(variable(f), variable(g)))),
-           "fix (f g)").
+    parse(fix(app(variable(f), variable(g))),
+          "fix (f g)").
+
+test(iseven) :-
+    parse(_,
+          "\\ie:Nat->Bool.\\x:Nat.if (iszero x) then true else if (iszero (pred x)) then false else ie (pred (pred x))").
 
 :- end_tests(parser).
