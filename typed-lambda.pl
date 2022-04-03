@@ -2,9 +2,6 @@
 
 :- use_module(syntax).
 
-desugar(let(X, Type, Term1, Term2),
-        app(lambda(X, Type, Term2), Term1)).
-
 % VALUES
 value(true).
 value(false).
@@ -182,6 +179,12 @@ typing(Ctxt, inject_left(Term, sumT(T1, T2)), sumT(T1, T2)) :-
 typing(Ctxt, inject_right(Term, sumT(T1, T2)), sumT(T1, T2)) :-
     typing(Ctxt, Term, T2).
 
+typing(Ctxt, case(Var,
+                  variable(LeftX), LeftTerm,
+                  variable(RightX), RightTerm), T) :-
+    typing(Ctxt, Var, sumT(TLeft, TRight)),
+    typing([[LeftX, TLeft]|Ctxt], LeftTerm, T),
+    typing([[RightX, TRight]|Ctxt], RightTerm, T).
 
 
 
@@ -209,12 +212,17 @@ test(type_injection_left) :- phrase(term(T), "inl 12 as Nat + Bool"),
 test(type_injection_right) :- phrase(term(T), "inr true as Nat + Bool"),
                               typing([], T, sumT(natT, boolT)).
 
-test(type_fun2, [fail]) :-
-    typing([],
-           app(lambda(x,natT,snd(x)), 1),
-           _).
+test(type_case_left) :- phrase(term(T), "case node of inl x => 1 | inr y => y"),
+                        typing([[node, sumT(_, natT)]], T,
+                               natT).
 
-test(type_fun3, [fail]) :- typing([], app(lambda(x,natT,x), true), _).
+test(type_case_right) :- phrase(term(T), "case node of inl x => x | inr y => 0"),
+                         typing([[node, sumT(natT, _)]], T,
+                                natT).
+
+test(type_var) :- phrase(term(T), "x"),
+                  typing([[x, natT]], T, natT).
+
 
 :- end_tests(typing).
 
