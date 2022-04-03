@@ -66,10 +66,10 @@ pair(T1, T2) --> "{", term(T1), ", ", term(T2), "}".
 
 % Terms
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
-term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
-term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(inject_left(Term, Type)) --> "inl", " ", term(Term), " as ", type(Type).
 term(inject_right(Term, Type)) --> "inr", " ", term(Term), " as ", type(Type).
+term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
+term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> "case", " ", term(Term), " ", "of", " ",
                                                          case_left(LeftX, LeftTerm), " | ",
                                                          case_right(RightX, RightTerm).
@@ -181,6 +181,15 @@ test(inject_left) :-
 test(inject_right) :-
     phrase(term(inject_right(variable(x), sumT(boolT, natT))),
            "inr x as Bool + Nat").
+
+test(case_inject) :-
+    phrase(term(case(inject_left(zero, natT),
+                     variable(x),
+                     variable(x),
+                     variable(y),
+                     variable(y))),
+           "case inl 0 as Nat of inl x => x | inr y => y").
+
 
 test(let) :-
     phrase(term(app(lambda(variable(x),
