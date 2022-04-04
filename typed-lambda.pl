@@ -43,21 +43,21 @@ eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
 
 % Eval rules for sum types
 eval(case(inject_left(V0, _),
-          variable(XLeft), TLeft,
-          variable(_), _), Result) :-
+          XLeft, TLeft,
+          _, _), Result) :-
     substitute(XLeft, V0, TLeft, Result).
 
 eval(case(inject_right(V0, _),
-          variable(_), _,
-          variable(XRight), TRight), Result) :-
+          _, _,
+          XRight, TRight), Result) :-
   substitute(XRight, V0, TRight, Result).
 
 eval(case(T,
-          variable(XLeft), TLeft,
-          variable(XRight), TRight),
+          XLeft, TLeft,
+          XRight, TRight),
      case(T1,
-          variable(XLeft), TLeft,
-          variable(XRight), TRight)) :-
+          XLeft, TLeft,
+          XRight, TRight)) :-
     eval(T, T1).
 
 
