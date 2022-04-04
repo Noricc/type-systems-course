@@ -71,23 +71,26 @@ eval(Val, Val) :- value(Val).
 :- begin_tests(evaluator).
 :- set_prolog_flag(double_quotes, chars).
 
-test(eval0) :- phrase(term(T), "(\\x:Nat.x) 0"),
+test(eval0) :- parse(T, "(\\x:Nat.x) 0"),
                eval(T, zero).
 
-test(eval1) :- phrase(term(T), "(\\x:Nat.iszero 0) 0"),
-               eval(T, app(iszero, zero)).
+test(eval1) :- parse(T, "(\\x:Nat.iszero 0) 0"),
+               eval(T, iszero(zero)).
 
-test(eval2) :- phrase(term(T), "(\\y:Nat.(\\x:Nat.iszero x) y) 0"),
-               phrase(term(T1), "(\\x:Nat.iszero x) 0"),
+test(eval2) :- parse(T, "(\\y:Nat.(\\x:Nat.iszero x) y) 0"),
+               parse(T1, "(\\x:Nat.iszero x) 0"),
                eval(T, T1).
 
-test(eval_case_1) :- phrase(term(T), "case inl 3 as Nat of inl x => x | inr y => y"),
-                     phrase(term(Response), "3"),
+test(eval_case_1) :- parse(T, "case inl 3 as Nat of inl x => x | inr y => y"),
+                     parse(Response, "3"),
                      eval(T, Response).
 
-test(eval_case_2) :- phrase(term(T), "case inr 3 as Nat of inl x => x | inr y => y"),
-                     phrase(term(Response), "3"),
+
+test(eval_case_2) :- parse(T, "case inr 3 as Nat of inl x => x | inr y => y"),
+                     parse(Response, "3"),
                      eval(T, Response).
+
+
 :- end_tests(evaluator).
 
 % Substitution
