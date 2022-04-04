@@ -40,6 +40,8 @@ keyword(let) --> "let".
 keyword(pred) --> "pred".
 keyword(succ) --> "succ".
 keyword(iszero) --> "iszero".
+keyword(fst) --> "fst".
+keyword(snd) --> "snd".
 keyword(if) --> "if".
 keyword(then) --> "then".
 keyword(else) --> "else".
@@ -110,6 +112,8 @@ primary(T) --> [lparen], term(T), [rparen].
 term(iszero(T)) --> [iszero], term(T).
 term(pred(T)) --> [pred], term(T).
 term(succ(T)) --> [succ], term(T).
+term(fst(T)) --> [fst], term(T).
+term(snd(T)) --> [snd], term(T).
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
 term(fix(Term)) --> [fix], term(Term).
 term(inject_left(Term, Type)) --> [inl], term(Term), [as], type(Type).
