@@ -28,7 +28,7 @@ eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
 
-eval(app(lambda(variable(X), _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
+eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
 eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
 eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
 
