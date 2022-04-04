@@ -208,6 +208,9 @@ typing(Ctxt, case(Term,
     typing([[LeftX, TLeft]|Ctxt], LeftTerm, T),
     typing([[RightX, TRight]|Ctxt], RightTerm, T).
 
+% Typing of Fix
+typing(Ctxt, fix(Term), Type) :- typing(Ctxt, Term, Type).
+
 
 
 % Variables
@@ -244,6 +247,11 @@ test(type_case_right) :- parse(T, "case node of inl x => x | inr y => 0"),
 
 test(type_var) :- parse(T, "x"),
                   typing([[x, natT]], T, natT).
+
+test(fixpoint_f) :- parse(T, "fix f"),
+                    typing([[f, funT(natT, natT)]],
+                           T,
+                           funT(natT, natT)).
 
 
 :- end_tests(typing).
