@@ -201,10 +201,10 @@ typing(Ctxt, inject_left(Term, sumT(T1, T2)), sumT(T1, T2)) :-
 typing(Ctxt, inject_right(Term, sumT(T1, T2)), sumT(T1, T2)) :-
     typing(Ctxt, Term, T2).
 
-typing(Ctxt, case(Var,
-                  variable(LeftX), LeftTerm,
-                  variable(RightX), RightTerm), T) :-
-    typing(Ctxt, Var, sumT(TLeft, TRight)),
+typing(Ctxt, case(Term,
+                  LeftX, LeftTerm,
+                  RightX, RightTerm), T) :-
+    typing(Ctxt, Term, sumT(TLeft, TRight)),
     typing([[LeftX, TLeft]|Ctxt], LeftTerm, T),
     typing([[RightX, TRight]|Ctxt], RightTerm, T).
 
