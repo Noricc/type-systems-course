@@ -166,12 +166,11 @@ test(free_vars1) :-
 typing(_, true, boolT).
 typing(_, false, boolT).
 typing(_, zero, natT).
-typing(_, succ(T), natT) :- typing(_, T, natT).
-typing(_, pred, funT(natT, natT)).
-typing(_, succ, funT(natT, natT)).
-typing(_, iszero, funT(natT, boolT)).
-typing(_, fst, funT(pairT(T1, _),T1)).
-typing(_, snd, funT(pairT(_, T2), T2)).
+typing(C, succ(T), natT) :- typing(C, T, natT).
+typing(C, pred(T), natT) :- typing(C, T, natT).
+typing(C, iszero(T), boolT) :- typing(C, T, natT).
+typing(C, fst(T), Type) :- typing(C, T, pairT(Type, _)).
+typing(C, snd(T), Type) :- typing(C, T, pairT(_, Type)).
 
 typing(Ctxt, if(T1, T2, T3), T) :- typing(Ctxt, T1, boolT),
                                    typing(Ctxt, T2, T),
