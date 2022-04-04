@@ -27,8 +27,8 @@ digit(9) --> "9".
 
 % Copied from S-Overflow
 nat(N)   --> digit(D), nat(D,N).
-nat(N,N) --> [].
 nat(A,N) --> digit(D), { A1 is A*10 + D }, nat(A1,N).
+nat(N,N) --> [].
 
 symbol_num(zero, 0).
 symbol_num(succ(S), N) :- integer(N),
