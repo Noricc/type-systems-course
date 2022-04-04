@@ -18,9 +18,9 @@ numeric_value(succ(X)) :- numeric_value(X).
 % Computation rules
 eval(if(true, T1, _), T1).
 eval(if(false, _, T2), T2).
-eval(app(iszero, zero), true).
-eval(app(iszero, succ(_)), false).
-eval(pred(0), 0).
+eval(iszero(zero), true).
+eval(iszero(succ(_)), false).
+eval(pred(zero), 0).
 eval(pred(succ(NV)), NV) :- numeric_value(NV).
 
 eval(if(T1, T2, T3), if(T11, T2, T3)) :- eval(T1, T11).
