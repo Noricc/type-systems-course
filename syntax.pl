@@ -36,6 +36,7 @@ symbol_num(succ(S), N) :- integer(N),
                           N1 is (N - 1),
                           symbol_num(S, N1).
 
+keyword(letrec) --> "letrec".
 keyword(let) --> "let".
 keyword(pred) --> "pred".
 keyword(succ) --> "succ".
@@ -54,6 +55,7 @@ keyword(inr) --> "inr".
 keyword(fix) --> "fix".
 keyword(of) --> "of".
 keyword(in) --> "in".
+
 
 sign(lparen) --> "(".
 sign(rparen) --> ")".
@@ -122,6 +124,8 @@ term(if(Cond, Then, Else)) --> if(Cond, Then, Else).
 term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> [case], term(Term), [of],
                                                          case_left(LeftX, LeftTerm), [pipe],
                                                          case_right(RightX, RightTerm).
+term(app(lambda(X, T, T2),
+         fix(lambda(X, T, T1)))) --> [letrec], [variable(X)], [:], type(T), [=], term(T1), [in], term(T2).
 term(app(lambda(X, T, T2), T1)) --> [let], [variable(X)], [:], type(T), [=], term(T1), [in], term(T2).
 term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(T) --> primary(T).
@@ -282,5 +286,9 @@ test(fix) :-
 test(iseven) :-
     parse(_,
           "\\ie:Nat->Bool.\\x:Nat.if (iszero x) then true else if (iszero (pred x)) then false else ie (pred (pred x))").
+
+test(letrec) :-
+    parse(T, "letrec x : Nat = y in x"),
+    parse(T, "let x : Nat = fix (\\x : Nat . y) in x").
 
 :- end_tests(parser).
