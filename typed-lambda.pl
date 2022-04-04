@@ -183,9 +183,9 @@ typing(Ctxt, if(T1, T2, T3), T) :- typing(Ctxt, T1, boolT),
 
 
 % Functions
-typing(Ctxt, lambda(variable(X), Type, Term),
-       funT(Type, Type2)) :- append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
-                             typing(Ctxt1, Term, Type2). % and I can type the body with this new context
+typing(Ctxt, lambda(X, Type, Term), funT(Type, Type2)) :-
+    append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
+    typing(Ctxt1, Term, Type2). % and I can type the body with this new context
 
 % Function application
 typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(Argtype, T12)),
