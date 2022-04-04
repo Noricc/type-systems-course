@@ -162,7 +162,7 @@ type(pairT(T1, T2)) --> type(T1), [*], type(T2).
 type(T) --> [lparen], type(T), [rparen].
 
 parse(Ast, String) :- phrase(lexer(Symbols), String),
-                      phrase(term(Ast), Symbols).
+                      phrase(term(Ast), Symbols), !.
 
 :- begin_tests(parser).
 :- set_prolog_flag(double_quotes, chars).
