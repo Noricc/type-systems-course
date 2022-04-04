@@ -137,7 +137,7 @@ application([F, X|Xs]) --> primary(F), primary(X), arguments(Xs).
 arguments([]) --> [].
 arguments([T|Ts]) --> primary(T), arguments(Ts).
 
-if(Cond, Then, Else) --> [if], primary(Cond), [then], term(Then), [else], term(Else).
+if(Cond, Then, Else) --> [if], term(Cond), [then], term(Then), [else], term(Else).
 
 pair(T1, T2) --> [lcurly], term(T1), [,], term(T2), [rcurly].
 
@@ -233,6 +233,9 @@ test(nested_if) :-
 test(nested_if2) :-
     parse(if(true, if(false, true, false), true),
           "if true then if false then true else false else true").
+test(if) :-
+    parse(if(iszero(variable(x)),true,false),
+          "if iszero x then true else false").
 
 test(pair) :-
     parse(pair(zero, false),
@@ -286,6 +289,10 @@ test(fix) :-
 test(iseven) :-
     parse(_,
           "\\ie:Nat->Bool.\\x:Nat.if (iszero x) then true else if (iszero (pred x)) then false else ie (pred (pred x))").
+
+test(iseven2) :-
+    parse(_,
+          "letrec iseven : Nat -> Bool = \\x:Nat. if iszero x then true else if iszero (pred x) then false else iseven (pred (pred x)) in iseven 7").
 
 test(letrec) :-
     parse(T, "letrec x : Nat = y in x"),
