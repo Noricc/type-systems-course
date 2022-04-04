@@ -253,6 +253,10 @@ test(inject_left) :-
     parse(inject_left(variable(x), sumT(natT,boolT)),
           "inl x as Nat + Bool").
 
+test(inject_left_2) :-
+    parse(inject_left(succ(_), sumT(natT, boolT)),
+          "inl 12 as Nat + Bool").
+
 test(inject_right) :-
     parse(inject_right(variable(x), sumT(boolT, natT)),
           "inr x as Bool + Nat").
