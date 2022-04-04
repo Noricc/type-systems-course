@@ -139,12 +139,18 @@ test(sub2) :- substitute(x, zero, app(iszero, zero),
                          app(iszero, zero)).
 
 test(sub3) :- substitute(x, zero, zero, zero).
+
+test(sub4) :- substitute(x, fix(variable(x)),
+                         lambda(y, T, app(variable(x),
+                                          variable(y))),
+                         lambda(y, T, app(fix(variable(x)),
+                                          variable(y)))).
 :- end_tests(substitute).
 
 
 free_vars(true, []).
 free_vars(false, []).
-free_vars(variable(X), [variable(X)]).
+free_vars(variable(X), [X]).
 free_vars(if(T1, T2, T3), FreeVars) :- free_vars(T3, FV3),
                                        free_vars(T2, FV2),
                                        free_vars(T1, FV1),
