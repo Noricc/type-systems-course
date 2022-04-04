@@ -211,33 +211,33 @@ typing(Ctxt, variable(X), T) :- member([X, T], Ctxt).
 :- begin_tests(typing).
 :- set_prolog_flag(double_quotes, chars).
 
-test(type_pair) :- phrase(term(T), "{false, x}"),
+test(type_pair) :- parse(T, "{false, x}"),
                    typing([[x, natT]], T, pairT(boolT, natT)).
 
-test(type_fst) :- phrase(term(T), "fst {false, x}"),
+test(type_fst) :- parse(T, "fst {false, x}"),
                   typing([[x, natT]], T, boolT).
 
-test(type_snd) :- phrase(term(T), "snd {false, x}"),
+test(type_snd) :- parse(T, "snd {false, x}"),
                   typing([[x, natT]], T, natT).
 
-test(type_fun) :- phrase(term(T), "\\x:Nat.iszero x"),
+test(type_fun) :- parse(T, "\\x:Nat.iszero x"),
                   typing([],T, funT(natT,boolT)).
 
-test(type_injection_left) :- phrase(term(T), "inl 12 as Nat + Bool"),
+test(type_injection_left) :- parse(T, "inl 12 as Nat + Bool"),
                              typing([], T, sumT(natT, boolT)).
 
-test(type_injection_right) :- phrase(term(T), "inr true as Nat + Bool"),
+test(type_injection_right) :- parse(T, "inr true as Nat + Bool"),
                               typing([], T, sumT(natT, boolT)).
 
-test(type_case_left) :- phrase(term(T), "case node of inl x => 1 | inr y => y"),
+test(type_case_left) :- parse(T, "case node of inl x => 1 | inr y => y"),
                         typing([[node, sumT(_, natT)]], T,
                                natT).
 
-test(type_case_right) :- phrase(term(T), "case node of inl x => x | inr y => 0"),
+test(type_case_right) :- parse(T, "case node of inl x => x | inr y => 0"),
                          typing([[node, sumT(natT, _)]], T,
                                 natT).
 
-test(type_var) :- phrase(term(T), "x"),
+test(type_var) :- parse(T, "x"),
                   typing([[x, natT]], T, natT).
 
 
