@@ -240,9 +240,7 @@ typing(Ctxt, case(Term,
     typing([[RightX, TRight]|Ctxt], RightTerm, T).
 
 % Typing of Fix
-typing(Ctxt, fix(Term), Type) :- typing(Ctxt, Term, Type).
-
-
+typing(Ctxt, fix(Term), Type) :- typing(Ctxt, Term, funT(Type, Type)).
 
 % Variables
 typing(Ctxt, variable(X), T) :- member([X, T], Ctxt).
