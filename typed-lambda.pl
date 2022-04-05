@@ -279,11 +279,16 @@ test(type_case_right) :- parse(T, "case node of inl x => x | inr y => 0"),
 test(type_var) :- parse(T, "x"),
                   typing([[x, natT]], T, natT).
 
-test(fixpoint_f) :- parse(T, "fix f"),
-                    typing([[f, funT(natT, natT)]],
-                           T,
-                           funT(natT, natT)).
+test(fixpoint_f) :-
+    parse(T, "fix f"),
+    typing([[f, funT(funT(natT, natT), funT(natT, natT))]],
+           T,
+           funT(natT, natT)).
 
+test(fixpoint_factorial) :- parse(T, "letrec fact : Nat -> Nat = \\x:Nat . if iszero x then 1 else multiply x (fact (pred x)) in fact 3"),
+                            typing([[multiply, funT(natT, funT(natT, natT))]],
+                                   T,
+                                   natT).
 
 :- end_tests(typing).
 
