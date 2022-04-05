@@ -58,7 +58,7 @@ reduce(succ(T), succ(T1)) :- reduce(T, T1).
 % The premises are on the right side, the consequent on the left side of the :-
 
 % B-VALUE
-eval(X, X) :- value(X).
+eval(V, V) :- value(V).
 % eval(X, Y) :- X = Y, value(X). % There is an implicit rule here, that we talk about values
 
 % B-IFTRUE
