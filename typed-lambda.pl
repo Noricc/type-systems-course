@@ -134,6 +134,7 @@ substitute(X, V, app(T, T1), app(T21, T22)) :- substitute(X, V, T, T21),
 substitute(X, V, variable(X), V).
 % Not sure the X =/= Y is needed.
 substitute(X, _, variable(Y), variable(Y)) :- X \= Y.
+substitute(X, V, fix(T), fix(T1)) :- substitute(X, V, T, T1).
 
 substitute(_, _, T, T) :- value(T).
 
@@ -148,11 +149,11 @@ test(sub2) :- substitute(x, zero, app(iszero, zero),
 
 test(sub3) :- substitute(x, zero, zero, zero).
 
-test(sub4) :- substitute(x, fix(variable(x)),
-                         lambda(y, T, app(variable(x),
-                                          variable(y))),
-                         lambda(y, T, app(fix(variable(x)),
-                                          variable(y)))).
+test(sub4) :-
+    substitute(f,
+               fix(lambda(f, Ty, Lambda)),
+               lambda(y, T, app(variable(f), variable(y))),
+               lambda(y, T, app(fix(lambda(f, Ty, Lambda)), variable(y)))).
 :- end_tests(substitute).
 
 
