@@ -15,7 +15,18 @@ numeric_value(succ(X)) :- numeric_value(X).
 
 % Evaluation rules
 
+% What is a redex? 
+redex(app(lambda(_, _, _), _)).
+
 % Computation rules
+eval(app(lambda(X, _, T1), T2), R) :-
+    value(T2),
+    substitute(X, T2, T1, R).
+% Can only evaluate the left side if the argument is a value!
+eval(app(T1, T2), app(T11, T2)) :- value(T2), eval(T1, T11).
+% If argument is not a value, we evaluate it.
+eval(app(T1, T2), app(T1, T22)) :- eval(T2, T22).
+
 eval(if(true, T1, _), T1).
 eval(if(false, _, T2), T2).
 eval(iszero(zero), true).
@@ -28,9 +39,6 @@ eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
 
-eval(app(lambda(X, _, T1), V), R) :- value(V), substitute(X, V, T1, R), value(V).
-eval(app(T1, T2), app(T11, T2)) :- eval(T1, T11).
-eval(app(V1, T2), app(V1, T21)) :- value(V1), term(T2), eval(T2, T21).
 
 eval(fst(pair(V1, _)), V1) :- value(V1).
 eval(snd(pair(_, V2)), V2) :- value(V2).
