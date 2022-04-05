@@ -19,9 +19,12 @@ numeric_value(succ(X)) :- numeric_value(X).
 redex(app(lambda(_, _, _), _)).
 
 % Computation rules
-eval(app(lambda(X, _, T1), T2), R) :-
+eval(app(lambda(X, T1), T2), R) :-
     value(T2),
     substitute(X, T2, T1, R).
+eval(app(lambda(X, _, T1), T2), R) :-
+    eval(app(lambda(X, T1), T2), R).
+
 % Can only evaluate the left side if the argument is a value!
 eval(app(T1, T2), app(T11, T2)) :- value(T2), eval(T1, T11).
 % If argument is not a value, we evaluate it.
@@ -219,6 +222,9 @@ typing(Ctxt, lambda(X, Type, Term), funT(Type, Type2)) :-
     append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
     typing(Ctxt1, Term, Type2). % and I can type the body with this new context
 
+typing(Ctxt, lambda(X, Body), funT(Type1, Type2)) :- 
+    typing(Ctxt, lambda(X, Type1, Body), funT(Type1, Type2)).
+
 % Function application
 typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(Argtype, T12)),
                                   typing(Ctxt, T2, Argtype). % type of argument match
@@ -303,6 +309,9 @@ test(fixpoint_factorial) :- parse(T, "letrec fact : Nat -> Nat = \\x:Nat . if is
                                    T,
                                    natT).
 
+test(type_lambda) :-
+    parse(T, "\\b . if b then true else false"),
+    typing([], T, funT(boolT, boolT)).
 :- end_tests(typing).
 
 bigstep(T, V) :- eval(T, V), value(V), writeln(T).

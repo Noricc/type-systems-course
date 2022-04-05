@@ -116,6 +116,7 @@ term(pred(T)) --> [pred], term(T).
 term(succ(T)) --> [succ], term(T).
 term(fst(T)) --> [fst], term(T).
 term(snd(T)) --> [snd], term(T).
+term(lambda(X, Body)) --> abstraction(X, Body).
 term(lambda(X, T, Body)) --> abstraction(X, T, Body).
 term(fix(Term)) --> [fix], term(Term).
 term(inject_left(Term, Type)) --> [inl], term(Term), [as], type(Type).
@@ -131,6 +132,7 @@ term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(T) --> primary(T).
 
 abstraction(X, T, Body) --> [lambda], [variable(X)], [:], type(T), [.], term(Body).
+abstraction(X, Body) --> [lambda], [variable(X)], [.], term(Body).
 
 application([F, X|Xs]) --> primary(F), primary(X), arguments(Xs).
 
@@ -297,5 +299,9 @@ test(iseven2) :-
 test(letrec) :-
     parse(T, "letrec x : Nat = y in x"),
     parse(T, "let x : Nat = fix (\\x : Nat . y) in x").
+
+test(lambda_without_type) :-
+    parse(T, "\\b . if b then false else true"),
+    T = lambda(b, if(variable(b), false, true)).
 
 :- end_tests(parser).
