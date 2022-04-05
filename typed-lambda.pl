@@ -250,6 +250,20 @@ typing(Ctxt, variable(X), T) :- member([X, T], Ctxt).
 :- begin_tests(typing).
 :- set_prolog_flag(double_quotes, chars).
 
+test(type_if) :- parse(T, "if true then false else true"),
+                 typing([], T, boolT).
+
+test(type_if2, [fail]) :- parse(T, "if true then false else 0"),
+                          typing([], T, _).
+
+test(type_if3) :- parse(T, "if f 0 then x else y"),
+                  typing([[f, funT(natT, boolT)],
+                          [x, Ty],
+                          [y, Ty]],
+                         T,
+                         Ty).
+
+
 test(type_pair) :- parse(T, "{false, x}"),
                    typing([[x, natT]], T, pairT(boolT, natT)).
 
