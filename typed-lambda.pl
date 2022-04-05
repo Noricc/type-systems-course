@@ -72,11 +72,12 @@ eval(case(T,
 eval(inject_left(Term1, _), inject_left(Term2, _)) :- eval(Term1, Term2).
 eval(inject_right(Term1, _), inject_right(Term2, _)) :- eval(Term1, Term2).
 
-eval(fix(T), fix(T1)) :- eval(T, T1).
+
 eval(fix(lambda(X, Ty, Body)), T1) :- substitute(X,
                                                 fix(lambda(X, Ty, Body)),
                                                 Body,
                                                 T1).
+eval(fix(T), fix(T1)) :- eval(T, T1).
 
 eval(Val, Val) :- value(Val).
 
