@@ -1,6 +1,6 @@
 % The typed lambda calculus. Project 3 of type systems course
 
-:- use_module(syntax).
+:- [syntax].
 
 % VALUES
 value(true).
