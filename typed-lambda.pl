@@ -159,6 +159,7 @@ test(sub4) :-
 
 free_vars(true, []).
 free_vars(false, []).
+free_vars(zero, []).
 free_vars(variable(X), [X]).
 free_vars(if(T1, T2, T3), FreeVars) :- free_vars(T3, FV3),
                                        free_vars(T2, FV2),
@@ -173,14 +174,21 @@ free_vars(lambda(Y, _, T1), FreeVars) :- free_vars(T1, FVs),
 free_vars(app(T1, T2), FreeVars) :- free_vars(T1, FV1),
                                     free_vars(T2, FV2),
                                     union(FV1, FV2, FreeVars).
+free_vars(fix(T), FreeVars) :- free_vars(T, FreeVars).
+free_vars(fst(T), FreeVars) :- free_vars(T, FreeVars).
+free_vars(snd(T), FreeVars) :- free_vars(T, FreeVars).
+free_vars(pair(T1, T2), FreeVars) :- free_vars(T1, FreeVars1),
+                                     free_vars(T2, FreeVars2),
+                                     union(FreeVars1, FreeVars2, FreeVars).
+
 
 :- begin_tests(free_vars).
 test(free_vars0) :-
-    free_vars(lambda(variable(x), natT, app(variable(x), variable(y))),
-              [variable(y)]).
+    free_vars(lambda(x, natT, app(variable(x), variable(y))),
+              [y]).
 
 test(free_vars1) :-
-    free_vars(lambda(variable(x), natT, variable(x)),
+    free_vars(lambda(x, natT, variable(x)),
               []).
 
 :- end_tests(free_vars).
