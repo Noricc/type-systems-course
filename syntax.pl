@@ -127,6 +127,7 @@ term(case(Term, LeftX, LeftTerm, RightX, RightTerm)) --> [case], term(Term), [of
                                                          case_right(RightX, RightTerm).
 term(app(lambda(X, T, T2),
          fix(lambda(X, T, T1)))) --> [letrec], [variable(X)], [:], type(T), [=], term(T1), [in], term(T2).
+term(app(lambda(X, T2), T1)) --> [let], [variable(X)], [=], term(T1), [in], term(T2).
 term(app(lambda(X, T, T2), T1)) --> [let], [variable(X)], [:], type(T), [=], term(T1), [in], term(T2).
 term(app(T, X)) --> application(Args), { left_assoc(app(T, X), Args) }.
 term(T) --> primary(T).
@@ -303,5 +304,9 @@ test(letrec) :-
 test(lambda_without_type) :-
     parse(T, "\\b . if b then false else true"),
     T = lambda(b, if(variable(b), false, true)).
+
+test(let_without_type) :-
+    parse(T, "let x = v in t"),
+    T = app(lambda(x, variable(t)), variable(v)).
 
 :- end_tests(parser).
