@@ -222,12 +222,19 @@ typing(Ctxt, lambda(X, Type, Term), funT(Type, Type2)) :-
     append([[X, Type]], Ctxt, Ctxt1), % I add the type of input to the context
     typing(Ctxt1, Term, Type2). % and I can type the body with this new context
 
-typing(Ctxt, lambda(X, Body), funT(Type1, Type2)) :- 
+typing(Ctxt, lambda(X, Body), funT(Type1, Type2)) :-
     typing(Ctxt, lambda(X, Type1, Body), funT(Type1, Type2)).
 
 % Function application
-typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(Argtype, T12)),
-                                  typing(Ctxt, T2, Argtype). % type of argument match
+% Normal types
+typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(ArgType, T12)),
+                                  typing(Ctxt, T2, ArgType).
+
+% Type schemes
+typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(FreshArgType, ResultType)), % Create fresh type variables
+                                  typing(Ctxt, T2, ArgType),
+                                  unifiable(FreshArgType, ArgType, _), % Type of arguments has same shape
+                                  unifiable(ResultType, T12, _). % Type of result have same shape
 
 % Pairs
 typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
@@ -312,14 +319,24 @@ test(fixpoint_factorial) :- parse(T, "letrec fact : Nat -> Nat = \\x:Nat . if is
 test(type_lambda) :-
     parse(T, "\\b . if b then true else false"),
     typing([], T, funT(boolT, boolT)).
+
+test(type_polymorphism) :-
+    parse(T, "let double = (\\f . \\ x . f (f x)) in if (double (\\x . if x then false else true) false) then double (\\x . succ x) 0 else 0"),
+    typing([], T, natT).
+
+test(type_scheme) :-
+    parse(T, "(\\x:Nat.iszero x) 5"), typing([], T, boolT).
+
 :- end_tests(typing).
+
+
+% BIG STEP EVALUATION
 
 bigstep(T, V) :- eval(T, V), value(V), writeln(T).
 bigstep(T, V) :- eval(T, T1), writeln(T), bigstep(T1, V).
 
 evaluate(T, V) :- typing([], T, _),
                   bigstep(T, V).
-
 
 typeof(Term, Type) :- typing([], Term, Type).
 
