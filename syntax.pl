@@ -3,6 +3,7 @@
 
 % To allow using string notation....
 :- use_module(library(tabling)).
+:- use_module(library(clpfd)).
 
 :- set_prolog_flag(double_quotes, chars).
 
@@ -27,13 +28,13 @@ digit(9) --> "9".
 
 % Copied from S-Overflow
 nat(N)   --> digit(D), nat(D,N).
-nat(A,N) --> digit(D), { A1 is A*10 + D }, nat(A1,N).
+nat(A,N) --> digit(D), { A1 #= A*10 + D }, nat(A1,N).
 nat(N,N) --> [].
 
 symbol_num(zero, 0).
-symbol_num(succ(S), N) :- integer(N),
-                          N > 0,
-                          N1 is (N - 1),
+symbol_num(succ(S), N) :- N in 1..sup,
+                          N #> 0,
+                          N1 #= (N - 1),
                           symbol_num(S, N1).
 
 keyword(letrec) --> "letrec".
