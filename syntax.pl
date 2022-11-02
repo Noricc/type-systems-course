@@ -73,7 +73,7 @@ sign('->') --> "->".
 sign(+) --> "+".
 sign(*) --> "*".
 
-symbol(S) --> keyword(S).
+symbol(S) --> keyword(S), !.
 symbol(S) --> sign(S).
 symbol(number(N)) --> nat(N).
 symbol(variable(V)) --> variable(V).
@@ -190,8 +190,7 @@ test(identity_function2) :- parse(lambda(x, natT, variable(x)), "\\ x : Nat . (x
 
 test(application_in_abstraction) :- parse(lambda(x,
                                                  natT,
-                                                 app(variable(snd),
-                                                     variable(x))),
+                                                 snd(variable(x))),
                                            "\\x:Nat.snd x").
 
 
@@ -218,8 +217,7 @@ test(term_application_identity_true) :-
 
 test(term_application_id_one) :-
     parse(app(lambda(x,natT,
-                     app(variable(snd),
-                         variable(x))),
+                     snd(variable(x))),
               succ(zero)),
            "(\\x:Nat.snd x) 1").
 
@@ -250,8 +248,8 @@ test(pair1) :-
           "{{x, y}, z}").
 
 test(pairargs) :-
-    parse(app(variable(fst), pair(variable(x),
-                                  variable(y))),
+    parse(fst(pair(variable(x),
+                   variable(y))),
           "fst {x, y}").
 
 test(case) :-
@@ -282,7 +280,7 @@ test(case_inject) :-
 test(let) :-
     parse(app(lambda(x,
                      natT,
-                     app(variable(iszero), variable(x))),
+                     iszero(variable(x))),
               succ(succ(succ(zero)))),
           "let x:Nat = 3 in iszero x").
 
