@@ -361,10 +361,3 @@ test(iseven7) :-
           "letrec iseven : Nat -> Bool = \\x:Nat. if iszero x then true else if iszero (pred x) then false else iseven (pred (pred x)) in iseven 7"),
     evaluate(T, false).
 :- end_tests(evaluate).
-
-% TESTS
-% eval(app(lambda("x", _, 0), succ(0)), R). R = 0;
-% typing([], app(lambda("x", boolT, "x"), true), T).
-% eval(pair(true, iszero(0)), T).
-% eval(pair(iszero(0), iszero(succ(0))), T).
-% typing(L, snd(pair(false, "x")), natT).
