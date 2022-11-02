@@ -1,4 +1,4 @@
-% The typed lambda calculus. Project 3 of type systems course
+% The typed lambda calculus. Project 3, 4, 5 of type systems course
 
 :- [syntax].
 
@@ -13,9 +13,9 @@ numeric_value(zero).
 numeric_value(succ(X)) :- numeric_value(X).
 
 
-% Evaluation rules
+% EVALUATION
 
-% What is a redex? 
+% What is a redex?
 redex(app(lambda(_, _, _), _)).
 
 % Computation rules
@@ -32,17 +32,21 @@ eval(app(T1, T2), app(T1, T22)) :- eval(T2, T22).
 
 eval(if(true, T1, _), T1).
 eval(if(false, _, T2), T2).
+% Numbers are a language construct
 eval(iszero(zero), true).
 eval(iszero(succ(_)), false).
 eval(pred(zero), 0).
 eval(pred(succ(NV)), NV) :- numeric_value(NV).
 
+% For if-statements, we evaluate the condition first
 eval(if(T1, T2, T3), if(T11, T2, T3)) :- eval(T1, T11).
+% This works like normal functions, we evaluate the argument first
 eval(iszero(T), iszero(T1)) :- eval(T, T1).
 eval(succ(T), succ(T1)) :- eval(T, T1).
 eval(pred(T), pred(T1)) :- eval(T, T1).
 
 
+% PAIRS (Project 3)
 eval(fst(pair(V1, _)), V1) :- value(V1).
 eval(snd(pair(_, V2)), V2) :- value(V2).
 
@@ -52,6 +56,7 @@ eval(snd(T), T1) :- eval(T, T1).
 eval(pair(T1, T2), pair(T11, T2)) :- eval(T1, T11).
 eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
 
+% SUM TYPES (Project 4)
 % Eval rules for sum types
 eval(case(inject_left(V0, _),
           XLeft, TLeft,
@@ -76,6 +81,7 @@ eval(inject_left(Term1, _), inject_left(Term2, _)) :- eval(Term1, Term2).
 eval(inject_right(Term1, _), inject_right(Term2, _)) :- eval(Term1, Term2).
 
 
+% Fix operator (Project 4)
 eval(fix(lambda(X, Ty, Body)), T1) :- substitute(X,
                                                 fix(lambda(X, Ty, Body)),
                                                 Body,
@@ -197,15 +203,12 @@ test(free_vars1) :-
 
 :- end_tests(free_vars).
 
-% Doesn't work now
-% printterm(T) :- phrase(term(T), Message), writeln(Message).
-
-
 % TYPES
 % Build-in functions
 typing(_, true, boolT).
 typing(_, false, boolT).
 typing(_, zero, natT).
+% C is the context
 typing(C, succ(T), natT) :- typing(C, T, natT).
 typing(C, pred(T), natT) :- typing(C, T, natT).
 typing(C, iszero(T), boolT) :- typing(C, T, natT).
@@ -237,8 +240,8 @@ typing(Ctxt, app(T1, T2), T12) :- typing(Ctxt, T1, funT(FreshArgType, ResultType
                                   unifiable(ResultType, T12, _). % Type of result have same shape
 
 % Pairs
-typing(Ctxt, pair(T1, T2), pairT(TT1, TT2)) :- typing(Ctxt, T1, TT1),
-                                               typing(Ctxt, T2, TT2).
+typing(Ctxt, pair(Term1, Term2), pairT(Type1, Type2)) :- typing(Ctxt, Term1, Type1),
+                                                         typing(Ctxt, Term2, Type2).
 
 
 typing(Ctxt, inject_left(Term, sumT(T1, T2)), sumT(T1, T2)) :-
