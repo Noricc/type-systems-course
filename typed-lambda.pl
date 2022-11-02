@@ -50,8 +50,8 @@ eval(pred(T), pred(T1)) :- eval(T, T1).
 eval(fst(pair(V1, _)), V1) :- value(V1).
 eval(snd(pair(_, V2)), V2) :- value(V2).
 
-eval(fst(T), T1) :- eval(T, T1).
-eval(snd(T), T1) :- eval(T, T1).
+eval(fst(T), fst(T1)) :- eval(T, T1).
+eval(snd(T), snd(T1)) :- eval(T, T1).
 
 eval(pair(T1, T2), pair(T11, T2)) :- eval(T1, T11).
 eval(pair(V1, T2), pair(V1, T22)) :- value(V1), eval(T2, T22).
