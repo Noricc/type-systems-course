@@ -172,6 +172,12 @@ type(T) --> [lparen], type(T), [rparen].
 parse(Ast, String) :- phrase(lexer(Symbols), String),
                       phrase(term(Ast), Symbols), !.
 
+print(Ast, String) :- length(Symbols, _),
+                      phrase(term(Ast), Symbols),
+                      length(String, _),
+                      phrase(lexer(Symbols), String), !.
+
+
 :- begin_tests(parser).
 :- set_prolog_flag(double_quotes, chars).
 test(varname_x) :- phrase(varname([x]), "x").
