@@ -4,6 +4,9 @@
 (require pict)
 (require slideshow/latex)
 
+; (latex-dpi 300)
+
+(set-use-background-frame! #t)
 
 ;; LANGUAGE OF EQUATIONS
 (define exp1
@@ -50,6 +53,7 @@
 
 (add-preamble #<<latex
 \usepackage{amsmath, amssymb}
+\usepackage{mathptmx}
 latex
               )
 
