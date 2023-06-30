@@ -15,7 +15,7 @@
   - $\term{\lambda x . t}$: Functions
   - $\term{t~t}$: Function application
 
-** Evaluation
+** Evaluation (call-by-value)
 
   \begin{prooftree}
   \AxiomC{$\term{t_1} \rightarrow \term{t_1'}$}
@@ -76,7 +76,7 @@
   \begin{prooftree}
   \AxiomC{$\Gamma, \term{x} : \type{T_1} \vdash \term{t_2} : \type{T_2}$}
   \RightLabel{T-ABS}
-  \UnaryInfC{$\Gamma \vdash \term{\lambda x : \type{T_1} . t_2} : \type{T_1 \rightarrow T_2}$}
+  \UnaryInfC{$\Gamma \vdash \term{(\lambda x : \type{T_1} . t_2)} : \type{T_1 \rightarrow T_2}$}
   \end{prooftree}
 
 * Typing rules (T-APP)
@@ -106,7 +106,7 @@
   \begin{prooftree}
   \AxiomC{$\Gamma, \term{x} : \type{T_1} \vdash \term{t_2} : \type{T_2}$}
   \RightLabel{T-ABS}
-  \UnaryInfC{$\Gamma \vdash \term{\lambda x : \type{T_1} . t_2} : \type{T_1 \rightarrow T_2}$}
+  \UnaryInfC{$\Gamma \vdash \term{(\lambda x : \type{T_1} . t_2)} : \type{T_1 \rightarrow T_2}$}
   \end{prooftree}
 
 ** Typing rule for applying functions
