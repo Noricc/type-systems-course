@@ -166,7 +166,7 @@ test(sub4) :-
                lambda(y, T, app(fix(lambda(f, Ty, Lambda)), variable(y)))).
 :- end_tests(substitute).
 
-
+% Free Variables in expression
 free_vars(true, []).
 free_vars(false, []).
 free_vars(zero, []).
@@ -335,7 +335,7 @@ test(type_scheme) :-
 
 % BIG STEP EVALUATION
 
-bigstep(T, V) :- eval(T, V), value(V), writeln(T).
+bigstep(T, V) :- eval(T, V), value(V), writeln(V).
 bigstep(T, V) :- eval(T, T1), writeln(T), bigstep(T1, V).
 
 evaluate(T, V) :- typing([], T, _),
@@ -361,3 +361,9 @@ test(iseven7) :-
           "letrec iseven : Nat -> Bool = \\x:Nat. if iszero x then true else if iszero (pred x) then false else iseven (pred (pred x)) in iseven 7"),
     evaluate(T, false).
 :- end_tests(evaluate).
+
+% Thoughts
+% Prolog was amazing for the interpreter / type inference
+% Parsing was hard!
+%
+% In prolog you can search for /trees/, can you do that with Z3 / minizinc ?
