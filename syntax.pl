@@ -78,9 +78,9 @@ symbol(S) --> sign(S).
 symbol(number(N)) --> nat(N).
 symbol(variable(V)) --> variable(V).
 
-whitespace() --> " ", whitespace().
-whitespace() --> " ".
 whitespace() --> [].
+whitespace() --> " ".
+whitespace() --> " ", whitespace().
 
 lexer([]) --> [].
 lexer([S]) --> symbol(S).
@@ -172,9 +172,7 @@ type(T) --> [lparen], type(T), [rparen].
 parse(Ast, String) :- phrase(lexer(Symbols), String),
                       phrase(term(Ast), Symbols), !.
 
-print(Ast, String) :- length(Symbols, _),
-                      phrase(term(Ast), Symbols),
-                      length(String, _),
+print(Ast, String) :- phrase(term(Ast), Symbols),
                       phrase(lexer(Symbols), String), !.
 
 
